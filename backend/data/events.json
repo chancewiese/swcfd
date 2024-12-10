@@ -1,66 +1,97 @@
 {
-   "events": [
-      {
-         "id": "1",
-         "title": "Pickleball Tournament",
-         "description": "Annual Pickleball Tournament",
-         "location": "Canyon Meadows Pickleball Courts",
-         "registrationid": "pickleball",
-         "segments": [
-            {
-               "id": "1-1",
-               "title": "Women's Doubles",
-               "date": "Aug 1",
-               "time": "6:00 PM",
-               "description": "Women's doubles bracket"
-            },
-            {
-               "id": "1-2",
-               "title": "Men's Doubles",
-               "date": "Aug 2",
-               "time": "7:00 PM",
-               "description": "Men's doubles bracket"
-            },
-            {
-               "id": "1-3",
-               "title": "Mixed Doubles",
-               "date": "Aug 3",
-               "time": "6:00 PM",
-               "description": "Mixed doubles bracket"
-            }
-         ]
-      },
-      {
-         "id": "2",
-         "title": "Community Dinner",
-         "description": "Annual community dinner and social",
-         "location": "Community Center",
-         "registrationid": "dinner",
-         "date": "Aug 4",
-         "time": "6:00 PM"
-      },
-      {
-         "id": "3",
-         "title": "Basketball Tournament",
-         "description": "3 on 3 basketball tournament",
-         "location": "South Weber Park",
-         "registrationid": "basketball",
-         "segments": [
-            {
-               "id": "3-1",
-               "title": "Youth Bracket",
-               "date": "Aug 5",
-               "time": "9:00 AM",
-               "description": "Ages 12-17"
-            },
-            {
-               "id": "3-2",
-               "title": "Adult Bracket",
-               "date": "Aug 5",
-               "time": "1:00 PM",
-               "description": "Ages 18+"
-            }
-         ]
-      }
-   ]
+  "events": [
+    {
+      "id": "1",
+      "title": "Pickleball Tournament",
+      "description": "Annual Pickleball Tournament",
+      "location": "Canyon Meadows Pickleball Courts",
+      "registrationId": "pickleball",
+      "segments": [
+        {
+          "id": "1-1",
+          "title": "Women's Doubles",
+          "date": "2024-08-01",
+          "time": "17:00",
+          "maxTeams": 16
+        },
+        {
+          "id": "1-2",
+          "title": "Men's Doubles",
+          "date": "2024-08-02",
+          "time": "19:00",
+          "maxTeams": 16
+        },
+        {
+          "id": "1-3",
+          "title": "Mixed Doubles",
+          "date": "2024-08-02",
+          "time": "18:00",
+          "maxTeams": 16
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Community Dinner",
+      "description": "Annual community dinner and social",
+      "location": "Community Center",
+      "registrationId": "dinner",
+      "date": "2024-08-04",
+      "time": "18:00",
+      "maxParticipants": 200
+    },
+    {
+      "id": "3",
+      "title": "Basketball Tournament",
+      "description": "3 on 3 basketball tournament",
+      "location": "South Weber Park",
+      "registrationId": "basketball",
+      "segments": [
+        {
+          "id": "3-1",
+          "title": "Youth Bracket",
+          "date": "2024-08-05",
+          "time": "09:00",
+          "maxTeams": 8
+        },
+        {
+          "id": "3-2",
+          "title": "Adult Bracket",
+          "date": "2024-08-05",
+          "time": "13:00",
+          "maxTeams": 8
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Golf Tournament",
+      "description": "Annual Golf Tournament",
+      "location": "Riverside Golf Course",
+      "registrationId": "golf",
+      "segments": [
+        {
+          "id": "4-1",
+          "title": "Women's Teams",
+          "date": "2024-08-01",
+          "time": "18:00",
+          "maxTeams": 6
+        },
+        {
+          "id": "4-2",
+          "title": "Men's Teams",
+          "date": "2024-08-02",
+          "time": "19:00",
+          "maxTeams": 6
+        },
+        {
+          "id": "4-3",
+          "title": "Mixed Teams",
+          "date": "2024-08-02",
+          "time": "18:00",
+          "maxTeams": 6
+        }
+      ]
+    }
+  ]
 }

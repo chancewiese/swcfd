@@ -23,6 +23,7 @@ import {
    ContactSupport,
    Store,
    Login,
+   Logout,
    Group,
    Home,
 } from "@mui/icons-material";

@@ -9,24 +9,37 @@ import {
    Typography,
    Alert,
    Box,
+   IconButton,
+   InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useAuth } from "../context/AuthContext";
 
 const LoginPage = () => {
    const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
+   const [showPassword, setShowPassword] = useState(false);
    const [error, setError] = useState("");
    const navigate = useNavigate();
    const { login } = useAuth();
 
    const handleSubmit = async (e) => {
       e.preventDefault();
-      const result = await login(email, password);
-      if (result.success) {
-         navigate("/");
-      } else {
-         setError(result.error);
+      setError("");
+      try {
+         const result = await login(email, password);
+         if (result.success) {
+            navigate("/");
+         } else {
+            setError(result.error);
+         }
+      } catch (err) {
+         setError("Failed to login. Please try again.");
       }
+   };
+
+   const handleTogglePassword = () => {
+      setShowPassword(!showPassword);
    };
 
    return (
@@ -48,6 +61,7 @@ const LoginPage = () => {
                      fullWidth
                      label="Email"
                      name="email"
+                     type="email"
                      autoComplete="email"
                      value={email}
                      onChange={(e) => setEmail(e.target.value)}
@@ -57,13 +71,34 @@ const LoginPage = () => {
                      fullWidth
                      label="Password"
                      name="password"
-                     type="password"
+                     type={showPassword ? "text" : "password"}
                      autoComplete="current-password"
                      value={password}
                      onChange={(e) => setPassword(e.target.value)}
-                     sx={{ mb: 2 }}
+                     sx={{ mb: 3 }}
+                     InputProps={{
+                        endAdornment: (
+                           <InputAdornment position="end">
+                              <IconButton
+                                 onClick={handleTogglePassword}
+                                 edge="end"
+                              >
+                                 {showPassword ? (
+                                    <VisibilityOff />
+                                 ) : (
+                                    <Visibility />
+                                 )}
+                              </IconButton>
+                           </InputAdornment>
+                        ),
+                     }}
                   />
-                  <Button type="submit" fullWidth variant="contained">
+                  <Button
+                     type="submit"
+                     fullWidth
+                     variant="contained"
+                     size="large"
+                  >
                      Sign In
                   </Button>
                </Box>

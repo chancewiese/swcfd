@@ -19,52 +19,26 @@ app.use((req, res, next) => {
    next();
 });
 
-// Event Routes
-app.get("/events/published", async (req, res) => {
+// Admin Routes
+app.get("/admin", async (req, res) => {
    try {
-      const fileContent = await fs.readFile("./data/events.json");
-      const eventsData = JSON.parse(fileContent);
-      const publishedEvents = eventsData.events.filter(
-         (e) => !e.hasOwnProperty("published") || e.published
-      );
-
-      const { groupBy, search } = req.query;
-
-      const events = search
-         ? filterBySearch(publishedEvents, search)
-         : publishedEvents;
-
-      if (groupBy) {
-         const groupedEvents = groupEventsBy(events, groupBy);
-         return res.status(200).json({ events: groupedEvents });
-      }
-
-      res.status(200).json({ events });
+      const fileContent = await fs.readFile("./data/admin.json");
+      const admin = JSON.parse(fileContent);
+      res.status(200).json({ admin });
    } catch (error) {
       res.status(500).json({
-         message: "Failed to fetch events",
+         message: "Failed to fetch admin data",
          error: error.message,
       });
    }
 });
 
+// Event Routes
 app.get("/events/all", async (req, res) => {
    try {
       const fileContent = await fs.readFile("./data/events.json");
       const eventsData = JSON.parse(fileContent);
-
-      const { groupBy, search } = req.query;
-
-      const events = search
-         ? filterBySearch(eventsData.events, search)
-         : eventsData.events;
-
-      if (groupBy) {
-         const groupedEvents = groupEventsBy(events, groupBy);
-         return res.status(200).json({ events: groupedEvents });
-      }
-
-      res.status(200).json({ events });
+      res.status(200).json({ events: eventsData.events });
    } catch (error) {
       res.status(500).json({
          message: "Failed to fetch events",
@@ -73,14 +47,14 @@ app.get("/events/all", async (req, res) => {
    }
 });
 
-app.get("/events/:registrationId", async (req, res) => {
+app.get("/events/registration/:registrationId", async (req, res) => {
    try {
       const registrationId = req.params.registrationId;
       const fileContent = await fs.readFile("./data/events.json");
       const eventsData = JSON.parse(fileContent);
 
       const event = eventsData.events.find(
-         (e) => e.registrationid === registrationId
+         (e) => e.registrationId === registrationId
       );
 
       if (!event) {
@@ -96,73 +70,29 @@ app.get("/events/:registrationId", async (req, res) => {
    }
 });
 
-app.post("/events", async (req, res) => {
-   try {
-      const event = req.body.event;
-
-      if (!event || !event.title || !event.registrationid) {
-         return res.status(422).json({
-            message:
-               "Invalid event data, required fields: [title, registrationid]",
-         });
-      }
-
-      const fileContent = await fs.readFile("./data/events.json");
-      const eventsData = JSON.parse(fileContent);
-
-      // Generate new ID
-      const maxId = Math.max(
-         ...eventsData.events.map((e) => parseInt(e.id)),
-         0
-      );
-      const newEvent = {
-         ...event,
-         id: String(maxId + 1),
-      };
-
-      const updatedEvents = {
-         events: [...eventsData.events, newEvent],
-      };
-
-      await fs.writeFile(
-         "./data/events.json",
-         JSON.stringify(updatedEvents, null, 2)
-      );
-
-      res.status(201).json({ message: "Event created!", event: newEvent });
-   } catch (error) {
-      res.status(500).json({
-         message: "Failed to create event",
-         error: error.message,
-      });
-   }
-});
-
 app.put("/events/:eventId", async (req, res) => {
    try {
       const eventId = req.params.eventId;
       const event = req.body.event;
 
-      if (!event || !event.title || !event.registrationid) {
+      if (!event || !event.title) {
          return res.status(422).json({
-            message:
-               "Invalid event data, required fields: [title, registrationid]",
+            message: "Invalid event data, required fields: [title]",
          });
       }
 
       const fileContent = await fs.readFile("./data/events.json");
       const eventsData = JSON.parse(fileContent);
-      const eventExists = eventsData.events.some(
-         (e) => String(e.id) === eventId
-      );
+      const eventExists = eventsData.events.some((e) => e.id === eventId);
 
       if (!eventExists) {
          return res.status(404).json({ message: "Event not found" });
       }
 
+      // Update the event while preserving other events
       const updatedEvents = {
          events: eventsData.events.map((e) =>
-            String(e.id) === eventId ? { ...e, ...event } : e
+            e.id === eventId ? { ...e, ...event } : e
          ),
       };
 
@@ -180,122 +110,179 @@ app.put("/events/:eventId", async (req, res) => {
    }
 });
 
-app.delete("/events/:eventId", async (req, res) => {
+// Add a new segment to an event
+app.post("/events/:eventId/segments", async (req, res) => {
    try {
       const eventId = req.params.eventId;
+      const segment = req.body.segment;
 
-      const fileContent = await fs.readFile("./data/events.json");
-      const eventsData = JSON.parse(fileContent);
-      const eventExists = eventsData.events.some(
-         (e) => String(e.id) === eventId
-      );
-
-      if (!eventExists) {
-         return res.status(404).json({ message: "Event not found" });
-      }
-
-      const updatedEvents = {
-         events: eventsData.events.filter((e) => String(e.id) !== eventId),
-      };
-
-      await fs.writeFile(
-         "./data/events.json",
-         JSON.stringify(updatedEvents, null, 2)
-      );
-
-      res.status(200).json({ message: "Event deleted!" });
-   } catch (error) {
-      res.status(500).json({
-         message: "Failed to delete event",
-         error: error.message,
-      });
-   }
-});
-
-// Admin Routes
-app.get("/admin", async (req, res) => {
-   try {
-      const fileContent = await fs.readFile("./data/admin.json");
-      const admin = JSON.parse(fileContent);
-      res.status(200).json({ admin });
-   } catch (error) {
-      res.status(500).json({
-         message: "Failed to fetch admin data",
-         error: error.message,
-      });
-   }
-});
-
-app.put("/admin", async (req, res) => {
-   try {
-      const admin = req.body.admin;
-
-      if (!admin || !admin.username || !admin.password) {
+      if (!segment || !segment.title || !segment.date || !segment.time) {
          return res.status(422).json({
             message:
-               "Invalid admin data, required fields: [username, password]",
+               "Invalid segment data, required fields: [title, date, time]",
          });
       }
 
-      const fileContent = await fs.readFile("./data/admin.json");
-      const adminData = { ...JSON.parse(fileContent), ...admin };
+      const fileContent = await fs.readFile("./data/events.json");
+      const eventsData = JSON.parse(fileContent);
+      const event = eventsData.events.find((e) => e.id === eventId);
+
+      if (!event) {
+         return res.status(404).json({ message: "Event not found" });
+      }
+
+      // Generate new segment ID
+      const newSegment = {
+         id: `${eventId}-${Date.now()}`,
+         ...segment,
+      };
+
+      // Add segment to event
+      event.segments = event.segments || [];
+      event.segments.push(newSegment);
+
       await fs.writeFile(
-         "./data/admin.json",
-         JSON.stringify(adminData, null, 2)
+         "./data/events.json",
+         JSON.stringify(eventsData, null, 2)
       );
 
-      res.status(200).json({ message: "Admin User updated!" });
+      res.status(201).json({
+         message: "Segment added!",
+         segment: newSegment,
+      });
    } catch (error) {
       res.status(500).json({
-         message: "Failed to update admin",
+         message: "Failed to add segment",
          error: error.message,
       });
    }
 });
 
-// Helper Functions
-function groupEventsBy(events, key) {
-   return events.reduce((acc, event) => {
-      const group = event[key];
-      if (!acc[group]) {
-         acc[group] = [];
+// Delete a segment from an event
+app.delete("/events/:eventId/segments/:segmentId", async (req, res) => {
+   try {
+      const { eventId, segmentId } = req.params;
+
+      const fileContent = await fs.readFile("./data/events.json");
+      const eventsData = JSON.parse(fileContent);
+      const event = eventsData.events.find((e) => e.id === eventId);
+
+      if (!event) {
+         return res.status(404).json({ message: "Event not found" });
       }
-      acc[group].push(event);
-      return acc;
-   }, {});
-}
 
-function filterBySearch(events, search) {
-   const searchLower = search.toLowerCase();
-   return events.filter((event) => {
-      // Search in main event fields
-      const mainFields = [
-         event.title,
-         event.description,
-         event.location,
-         event.date,
-         event.time,
-      ].filter(Boolean);
+      // Remove segment
+      event.segments = event.segments.filter((s) => s.id !== segmentId);
 
-      // Search in segments if they exist
-      const segmentFields = event.segments
-         ? event.segments
-              .flatMap((segment) => [
-                 segment.title,
-                 segment.description,
-                 segment.date,
-                 segment.time,
-              ])
-              .filter(Boolean)
-         : [];
-
-      const allSearchableFields = [...mainFields, ...segmentFields];
-
-      return allSearchableFields.some((field) =>
-         String(field).toLowerCase().includes(searchLower)
+      await fs.writeFile(
+         "./data/events.json",
+         JSON.stringify(eventsData, null, 2)
       );
-   });
-}
+
+      res.status(200).json({ message: "Segment deleted!" });
+   } catch (error) {
+      res.status(500).json({
+         message: "Failed to delete segment",
+         error: error.message,
+      });
+   }
+});
+
+// Registration Routes
+app.get("/registrations/:registrationId", async (req, res) => {
+   try {
+      const fileContent = await fs.readFile("./data/registrations.json");
+      const registrationsData = JSON.parse(fileContent);
+      const registrationId = req.params.registrationId;
+
+      const registrations = registrationsData.registrations[registrationId] || {
+         registrants: [],
+      };
+
+      res.status(200).json(registrations);
+   } catch (error) {
+      res.status(500).json({
+         message: "Failed to fetch registrations",
+         error: error.message,
+      });
+   }
+});
+
+app.post("/registrations/:registrationId", async (req, res) => {
+   try {
+      const registrationId = req.params.registrationId;
+      const registration = req.body.registration;
+
+      const fileContent = await fs.readFile("./data/registrations.json");
+      const registrationsData = JSON.parse(fileContent);
+
+      if (!registrationsData.registrations[registrationId]) {
+         registrationsData.registrations[registrationId] = { registrants: [] };
+      }
+
+      const newRegistration = {
+         id: `${registrationId}-${Date.now()}`,
+         timestamp: new Date().toISOString(),
+         ...registration,
+      };
+
+      registrationsData.registrations[registrationId].registrants.push(
+         newRegistration
+      );
+
+      await fs.writeFile(
+         "./data/registrations.json",
+         JSON.stringify(registrationsData, null, 2)
+      );
+
+      res.status(201).json({
+         message: "Registration created!",
+         registration: newRegistration,
+      });
+   } catch (error) {
+      res.status(500).json({
+         message: "Failed to create registration",
+         error: error.message,
+      });
+   }
+});
+
+app.delete("/registrations/:registrationId/:id", async (req, res) => {
+   try {
+      const { registrationId, id } = req.params;
+
+      const fileContent = await fs.readFile("./data/registrations.json");
+      const registrationsData = JSON.parse(fileContent);
+
+      if (!registrationsData.registrations[registrationId]) {
+         return res
+            .status(404)
+            .json({ message: "Registration type not found" });
+      }
+
+      const registrants =
+         registrationsData.registrations[registrationId].registrants;
+      const index = registrants.findIndex((r) => r.id === id);
+
+      if (index === -1) {
+         return res.status(404).json({ message: "Registration not found" });
+      }
+
+      registrants.splice(index, 1);
+
+      await fs.writeFile(
+         "./data/registrations.json",
+         JSON.stringify(registrationsData, null, 2)
+      );
+
+      res.status(200).json({ message: "Registration deleted!" });
+   } catch (error) {
+      res.status(500).json({
+         message: "Failed to delete registration",
+         error: error.message,
+      });
+   }
+});
 
 // 404 Handler
 app.use((req, res) => {

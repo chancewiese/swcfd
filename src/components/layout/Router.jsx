@@ -8,6 +8,7 @@ import GalleryPage from "../../pages/GalleryPage";
 import SponsorsPage from "../../pages/SponsorsPage";
 import ContactPage from "../../pages/ContactPage";
 import LoginPage from "../../pages/LoginPage";
+import PickleballPage from "../../pages/events/PickleballPage";
 
 const Router = () => {
    return (
@@ -20,6 +21,7 @@ const Router = () => {
          <Route path="/sponsors" element={<SponsorsPage />} />
          <Route path="/contact" element={<ContactPage />} />
          <Route path="/login" element={<LoginPage />} />
+         <Route path="/events/pickleball" element={<PickleballPage />} />
          <Route path="*" element={<Navigate to="/" />} />
       </Routes>
    );

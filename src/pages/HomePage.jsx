@@ -10,6 +10,7 @@ import {
    Stack,
    Paper,
 } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 const HomePage = () => {
    const upcomingEvents = [
@@ -68,6 +69,8 @@ const HomePage = () => {
                   <Button
                      variant="contained"
                      size="large"
+                     component={RouterLink}
+                     to={"/events"}
                      sx={{
                         bgcolor: "white",
                         color: "primary.main",
@@ -138,7 +141,12 @@ const HomePage = () => {
                   Join our community and stay updated with local events and
                   activities.
                </Typography>
-               <Button variant="contained" sx={{ mt: 2 }}>
+               <Button
+                  variant="contained"
+                  component={RouterLink}
+                  to={"/contact"}
+                  sx={{ mt: 2 }}
+               >
                   Contact Us
                </Button>
             </Paper>

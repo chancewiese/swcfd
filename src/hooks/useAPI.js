@@ -47,17 +47,7 @@ export const useAPI = () => {
    const getPublishedEvents = useCallback(
       (params) => {
          return request({
-            endpoint: "/events/published",
-            params,
-         });
-      },
-      [request]
-   );
-
-   const getAllEvents = useCallback(
-      (params) => {
-         return request({
-            endpoint: "/events/all",
+            endpoint: "/events/all", // Changed to /all since we're not using published filter
             params,
          });
       },
@@ -67,18 +57,7 @@ export const useAPI = () => {
    const getEventByRegistrationId = useCallback(
       (registrationId) => {
          return request({
-            endpoint: `/events/${registrationId}`,
-         });
-      },
-      [request]
-   );
-
-   const createEvent = useCallback(
-      (eventData) => {
-         return request({
-            endpoint: "/events",
-            method: "POST",
-            data: { event: eventData },
+            endpoint: `/events/registration/${registrationId}`,
          });
       },
       [request]
@@ -95,29 +74,55 @@ export const useAPI = () => {
       [request]
    );
 
-   const deleteEvent = useCallback(
-      (eventId) => {
+   // Add new segment to event
+   const addEventSegment = useCallback(
+      (eventId, segmentData) => {
          return request({
-            endpoint: `/events/${eventId}`,
+            endpoint: `/events/${eventId}/segments`,
+            method: "POST",
+            data: { segment: segmentData },
+         });
+      },
+      [request]
+   );
+
+   // Delete segment from event
+   const deleteEventSegment = useCallback(
+      (eventId, segmentId) => {
+         return request({
+            endpoint: `/events/${eventId}/segments/${segmentId}`,
             method: "DELETE",
          });
       },
       [request]
    );
 
-   // Admin API calls
-   const getAdminData = useCallback(() => {
-      return request({
-         endpoint: "/admin",
-      });
-   }, [request]);
-
-   const updateAdmin = useCallback(
-      (adminData) => {
+   // Registration API calls
+   const getRegistrations = useCallback(
+      (registrationId) => {
          return request({
-            endpoint: "/admin",
-            method: "PUT",
-            data: { admin: adminData },
+            endpoint: `/registrations/${registrationId}`,
+         });
+      },
+      [request]
+   );
+
+   const createRegistration = useCallback(
+      (registrationId, registrationData) => {
+         return request({
+            endpoint: `/registrations/${registrationId}`,
+            method: "POST",
+            data: { registration: registrationData },
+         });
+      },
+      [request]
+   );
+
+   const deleteRegistration = useCallback(
+      (registrationId, id) => {
+         return request({
+            endpoint: `/registrations/${registrationId}/${id}`,
+            method: "DELETE",
          });
       },
       [request]
@@ -126,16 +131,13 @@ export const useAPI = () => {
    return {
       loading,
       error,
-      request,
-      // Events API
       getPublishedEvents,
-      getAllEvents,
       getEventByRegistrationId,
-      createEvent,
       updateEvent,
-      deleteEvent,
-      // Admin API
-      getAdminData,
-      updateAdmin,
+      addEventSegment,
+      deleteEventSegment,
+      getRegistrations,
+      createRegistration,
+      deleteRegistration,
    };
 };
