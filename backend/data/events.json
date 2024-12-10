@@ -1,0 +1,66 @@
+{
+   "events": [
+      {
+         "id": "1",
+         "title": "Pickleball Tournament",
+         "description": "Annual Pickleball Tournament",
+         "location": "Canyon Meadows Pickleball Courts",
+         "registrationid": "pickleball",
+         "segments": [
+            {
+               "id": "1-1",
+               "title": "Women's Doubles",
+               "date": "Aug 1",
+               "time": "6:00 PM",
+               "description": "Women's doubles bracket"
+            },
+            {
+               "id": "1-2",
+               "title": "Men's Doubles",
+               "date": "Aug 2",
+               "time": "7:00 PM",
+               "description": "Men's doubles bracket"
+            },
+            {
+               "id": "1-3",
+               "title": "Mixed Doubles",
+               "date": "Aug 3",
+               "time": "6:00 PM",
+               "description": "Mixed doubles bracket"
+            }
+         ]
+      },
+      {
+         "id": "2",
+         "title": "Community Dinner",
+         "description": "Annual community dinner and social",
+         "location": "Community Center",
+         "registrationid": "dinner",
+         "date": "Aug 4",
+         "time": "6:00 PM"
+      },
+      {
+         "id": "3",
+         "title": "Basketball Tournament",
+         "description": "3 on 3 basketball tournament",
+         "location": "South Weber Park",
+         "registrationid": "basketball",
+         "segments": [
+            {
+               "id": "3-1",
+               "title": "Youth Bracket",
+               "date": "Aug 5",
+               "time": "9:00 AM",
+               "description": "Ages 12-17"
+            },
+            {
+               "id": "3-2",
+               "title": "Adult Bracket",
+               "date": "Aug 5",
+               "time": "1:00 PM",
+               "description": "Ages 18+"
+            }
+         ]
+      }
+   ]
+}
