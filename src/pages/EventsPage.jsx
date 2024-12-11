@@ -16,36 +16,46 @@ import { useAPI } from "../hooks/useAPI";
 import { format, parseISO } from "date-fns";
 
 const EventsPage = () => {
-   const { getPublishedEvents, loading, error } = useAPI();
+   const { getPublishedEvents, getRegistrations, loading, error } = useAPI();
    const [eventsByDay, setEventsByDay] = useState({});
+   const [registrationsByEvent, setRegistrationsByEvent] = useState({});
 
    useEffect(() => {
-      const fetchEvents = async () => {
+      const fetchData = async () => {
          try {
             const data = await getPublishedEvents();
 
-            // Group events by day
+            // Fetch registrations for each event
+            const registrationsData = {};
+            for (const event of data.events) {
+               if (event.registrationId) {
+                  const registrations = await getRegistrations(
+                     event.registrationId
+                  );
+                  registrationsData[event.registrationId] =
+                     registrations.registrants || [];
+               }
+            }
+            setRegistrationsByEvent(registrationsData);
+
+            // Group events by day (existing logic)
             const grouped = data.events.reduce((acc, event) => {
                if (event.segments) {
-                  // For events with segments, add to each day they occur on
                   event.segments.forEach((segment) => {
                      const dayKey = format(parseISO(segment.date), "MMM d");
                      if (!acc[dayKey]) {
                         acc[dayKey] = [];
                      }
 
-                     // Check if event already exists for this day
                      const existingEvent = acc[dayKey].find(
                         (e) => e.id === event.id
                      );
 
                      if (!existingEvent) {
-                        // Get all segments for this day
                         const daySegments = event.segments.filter(
                            (s) => format(parseISO(s.date), "MMM d") === dayKey
                         );
 
-                        // Get unique days excluding current day
                         const otherDays = [
                            ...new Set(
                               event.segments
@@ -66,7 +76,6 @@ const EventsPage = () => {
                      }
                   });
                } else {
-                  // Single-day event
                   const dayKey = format(parseISO(event.date), "MMM d");
                   if (!acc[dayKey]) {
                      acc[dayKey] = [];
@@ -76,10 +85,9 @@ const EventsPage = () => {
                return acc;
             }, {});
 
-            // Sort days by date
+            // Sort days (existing logic)
             const sortedGrouped = Object.fromEntries(
                Object.entries(grouped).sort((a, b) => {
-                  // Find an event for each day to get the date
                   const getDateFromDay = (dayKey) => {
                      const event = data.events.find((e) => {
                         if (e.segments) {
@@ -97,7 +105,7 @@ const EventsPage = () => {
                         }
                         return parseISO(event.date);
                      }
-                     return new Date(0); // fallback date if not found
+                     return new Date(0);
                   };
 
                   const dateA = getDateFromDay(a[0]);
@@ -108,12 +116,20 @@ const EventsPage = () => {
 
             setEventsByDay(sortedGrouped);
          } catch (err) {
-            console.error("Failed to fetch events:", err);
+            console.error("Failed to fetch data:", err);
          }
       };
 
-      fetchEvents();
-   }, [getPublishedEvents]);
+      fetchData();
+   }, [getPublishedEvents, getRegistrations]);
+
+   const getRegistrationCount = (event, segmentId = null) => {
+      const registrations = registrationsByEvent[event.registrationId] || [];
+      if (segmentId) {
+         return registrations.filter((r) => r.segmentId === segmentId).length;
+      }
+      return registrations.length;
+   };
 
    const renderEventCard = (event, currentDay) => (
       <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -143,10 +159,15 @@ const EventsPage = () => {
                            parseISO(`2024-01-01T${segment.time}`),
                            "h:mm a"
                         )}
-                        {segment.maxTeams &&
-                           ` | Max Teams: ${segment.maxTeams}`}
+                        {/* Modified team count display */}
+                        {` | Teams: ${getRegistrationCount(event, segment.id)}`}
+                        {segment.maxTeams && ` / ${segment.maxTeams}`}
+                        {/* Modified participant count display */}
                         {segment.maxParticipants &&
-                           ` | Max Participants: ${segment.maxParticipants}`}
+                           ` | Participants: ${getRegistrationCount(
+                              event,
+                              segment.id
+                           )} / ${segment.maxParticipants}`}
                      </Typography>
                   ))}
 
@@ -163,8 +184,9 @@ const EventsPage = () => {
             ) : (
                <Typography variant="body2">
                   {format(parseISO(`2024-01-01T${event.time}`), "h:mm a")}
-                  {event.maxParticipants &&
-                     ` | Max Participants: ${event.maxParticipants}`}
+                  {/* Modified participant count display for non-segmented events */}
+                  {` | Participants: ${getRegistrationCount(event)}`}
+                  {event.maxParticipants && ` / ${event.maxParticipants}`}
                </Typography>
             )}
 
@@ -200,7 +222,7 @@ const EventsPage = () => {
    return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
          <Typography variant="h3" gutterBottom>
-            Country Fair Days 2024 Events
+            Country Fair Days 2025 Events
          </Typography>
 
          {Object.entries(eventsByDay).map(([day, events]) => (

@@ -1,65 +1,46 @@
 {
-   "registrations": {
-      "pickleball": {
-         "registrants": [
-            {
-               "id": "pb-1",
-               "eventId": "1",
-               "segmentId": "1-1",
-               "timestamp": "2024-07-16T14:20:00Z",
-               "players": ["Chance", "Jake"],
-               "email": "jane@example.com",
-               "phone": "801-555-0123"
-            },
-            {
-               "id": "pb-2",
-               "eventId": "1",
-               "segmentId": "1-1",
-               "timestamp": "2024-07-16T14:20:00Z",
-               "players": ["Chance", "Jake"],
-               "email": "jane@example.com",
-               "phone": "801-555-0123"
-            }
-         ]
-      },
-      "dinner": {
-         "registrants": [
-            {
-               "id": "d-1",
-               "eventId": "2",
-               "timestamp": "2024-07-16T14:20:00Z",
-               "name": "John Smith",
-               "email": "john@example.com",
-               "ticketCount": 4
-            }
-         ]
-      },
-      "basketball": {
-         "registrants": [
-            {
-               "id": "bball-1",
-               "eventId": "3",
-               "segmentId": "3-1",
-               "timestamp": "2024-07-14T09:15:00Z",
-               "teamName": "Wildcats",
-               "captainEmail": "coach@example.com",
-               "captainPhone": "555-0456"
-            }
-         ]
-      },
-      "golf": {
-         "registrants": [
-            {
-               "id": "golf-123",
-               "eventId": "4",
-               "segmentId": "4-1",
-               "timestamp": "2024-07-13T11:45:00Z",
-               "status": "confirmed",
-               "teamName": "Eagles",
-               "captainEmail": "captain@example.com",
-               "captainPhone": "555-0789"
-            }
-         ]
-      }
-   }
+  "registrations": {
+    "pickleball": {
+      "registrants": []
+    },
+    "dinner": {
+      "registrants": [
+        {
+          "id": "d-1",
+          "eventId": "2",
+          "timestamp": "2024-07-16T14:20:00Z",
+          "name": "John Smith",
+          "email": "john@example.com",
+          "ticketCount": 4
+        }
+      ]
+    },
+    "basketball": {
+      "registrants": [
+        {
+          "id": "bball-1",
+          "eventId": "3",
+          "segmentId": "3-1",
+          "timestamp": "2024-07-14T09:15:00Z",
+          "teamName": "Wildcats",
+          "captainEmail": "coach@example.com",
+          "captainPhone": "555-0456"
+        }
+      ]
+    },
+    "golf": {
+      "registrants": [
+        {
+          "id": "golf-123",
+          "eventId": "4",
+          "segmentId": "4-1",
+          "timestamp": "2024-07-13T11:45:00Z",
+          "status": "confirmed",
+          "teamName": "Eagles",
+          "captainEmail": "captain@example.com",
+          "captainPhone": "555-0789"
+        }
+      ]
+    }
+  }
 }

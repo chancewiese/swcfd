@@ -93,25 +93,16 @@ export const useAPI = () => {
    );
 
    // Delete segment from event
-   const deleteEventSegment = useCallback(
-      async (eventId, segmentId) => {
-         try {
-            const response = await request({
-               endpoint: `/events/${eventId}/segments/${segmentId}`,
-               method: "DELETE",
-               headers: {
-                  Accept: "application/json",
-                  "Content-Type": "application/json",
-               },
-            });
-            return response;
-         } catch (error) {
-            console.error("Delete request failed:", error);
-            throw error;
-         }
-      },
-      [request]
-   );
+   const deleteEventSegment = useCallback(async (eventId, segmentId) => {
+      try {
+         return await axios.delete(
+            `${API_BASE_URL}/events/${eventId}/segments/${segmentId}`
+         );
+      } catch (error) {
+         console.error("Error in deleteEventSegment:", error);
+         throw error;
+      }
+   }, []);
 
    // Registration API calls
    const getRegistrations = useCallback(
@@ -134,15 +125,27 @@ export const useAPI = () => {
       [request]
    );
 
-   const deleteRegistration = useCallback(
-      (registrationId, id) => {
+   const updateRegistration = useCallback(
+      async (registrationId, id, updatedData) => {
          return request({
             endpoint: `/registrations/${registrationId}/${id}`,
-            method: "DELETE",
+            method: "PUT",
+            data: { registration: updatedData },
          });
       },
       [request]
    );
+
+   const deleteRegistration = useCallback(async (registrationId, id) => {
+      try {
+         return await axios.delete(
+            `${API_BASE_URL}/registrations/${registrationId}/${id}`
+         );
+      } catch (error) {
+         console.error("Error in deleteRegistration:", error);
+         throw error;
+      }
+   }, []);
 
    return {
       loading,
@@ -155,5 +158,6 @@ export const useAPI = () => {
       getRegistrations,
       createRegistration,
       deleteRegistration,
+      updateRegistration,
    };
 };
