@@ -33,6 +33,12 @@ export const useAPI = () => {
 
             return response.data;
          } catch (err) {
+            console.error("Request error:", {
+               endpoint,
+               method,
+               error: err.response?.data || err.message,
+               status: err.response?.status,
+            });
             const errorMessage = err.response?.data?.message || err.message;
             setError(errorMessage);
             throw err;
@@ -88,11 +94,21 @@ export const useAPI = () => {
 
    // Delete segment from event
    const deleteEventSegment = useCallback(
-      (eventId, segmentId) => {
-         return request({
-            endpoint: `/events/${eventId}/segments/${segmentId}`,
-            method: "DELETE",
-         });
+      async (eventId, segmentId) => {
+         try {
+            const response = await request({
+               endpoint: `/events/${eventId}/segments/${segmentId}`,
+               method: "DELETE",
+               headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+               },
+            });
+            return response;
+         } catch (error) {
+            console.error("Delete request failed:", error);
+            throw error;
+         }
       },
       [request]
    );

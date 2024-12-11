@@ -24,8 +24,15 @@
         {
           "id": "1-3",
           "title": "Mixed Doubles",
-          "date": "2024-08-02",
+          "date": "2024-08-03",
           "time": "18:00",
+          "maxTeams": 16
+        },
+        {
+          "id": "1-1733874663396",
+          "title": "Kids",
+          "date": "2025-08-02",
+          "time": "17:50",
           "maxTeams": 16
         }
       ]

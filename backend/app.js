@@ -1,21 +1,31 @@
 // backend/app.js
-const fs = require("node:fs/promises");
 const express = require("express");
+const cors = require("cors");
 const bodyParser = require("body-parser");
+const fs = require("node:fs/promises");
 
 const app = express();
 
+app.use(cors());
+app.use(express.json());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // CORS and Headers
 app.use((req, res, next) => {
-   res.setHeader("Content-Type", "application/json");
    res.setHeader("Access-Control-Allow-Origin", "*");
-   res.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
-   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+   res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+   );
+   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+   // Handle preflight
    if (req.method === "OPTIONS") {
-      return res.status(204).end();
+      res.sendStatus(200);
+      return;
    }
+
    next();
 });
 
@@ -162,25 +172,37 @@ app.post("/events/:eventId/segments", async (req, res) => {
 app.delete("/events/:eventId/segments/:segmentId", async (req, res) => {
    try {
       const { eventId, segmentId } = req.params;
+      console.log("Deleting segment:", { eventId, segmentId });
 
-      const fileContent = await fs.readFile("./data/events.json");
+      const fileContent = await fs.readFile("./data/events.json", "utf8");
       const eventsData = JSON.parse(fileContent);
-      const event = eventsData.events.find((e) => e.id === eventId);
 
+      const event = eventsData.events.find((e) => e.id === eventId);
       if (!event) {
+         console.log("Event not found:", eventId);
          return res.status(404).json({ message: "Event not found" });
       }
 
-      // Remove segment
-      event.segments = event.segments.filter((s) => s.id !== segmentId);
+      console.log("Found event:", event.title);
+      console.log("Current segments:", event.segments);
+
+      const segmentIndex = event.segments.findIndex((s) => s.id === segmentId);
+      if (segmentIndex === -1) {
+         console.log("Segment not found:", segmentId);
+         return res.status(404).json({ message: "Segment not found" });
+      }
+
+      event.segments.splice(segmentIndex, 1);
 
       await fs.writeFile(
          "./data/events.json",
-         JSON.stringify(eventsData, null, 2)
+         JSON.stringify(eventsData, null, 2),
+         "utf8"
       );
 
-      res.status(200).json({ message: "Segment deleted!" });
+      res.status(200).json({ message: "Segment deleted successfully" });
    } catch (error) {
+      console.error("Delete segment error:", error);
       res.status(500).json({
          message: "Failed to delete segment",
          error: error.message,
@@ -250,11 +272,16 @@ app.post("/registrations/:registrationId", async (req, res) => {
 app.delete("/registrations/:registrationId/:id", async (req, res) => {
    try {
       const { registrationId, id } = req.params;
+      console.log("Deleting registration:", { registrationId, id });
 
-      const fileContent = await fs.readFile("./data/registrations.json");
+      const fileContent = await fs.readFile(
+         "./data/registrations.json",
+         "utf8"
+      );
       const registrationsData = JSON.parse(fileContent);
 
       if (!registrationsData.registrations[registrationId]) {
+         console.log("Registration type not found:", registrationId);
          return res
             .status(404)
             .json({ message: "Registration type not found" });
@@ -264,7 +291,11 @@ app.delete("/registrations/:registrationId/:id", async (req, res) => {
          registrationsData.registrations[registrationId].registrants;
       const index = registrants.findIndex((r) => r.id === id);
 
+      console.log("Registrant index:", index);
+      console.log("Current registrants:", registrants);
+
       if (index === -1) {
+         console.log("Registration not found:", id);
          return res.status(404).json({ message: "Registration not found" });
       }
 
@@ -272,11 +303,13 @@ app.delete("/registrations/:registrationId/:id", async (req, res) => {
 
       await fs.writeFile(
          "./data/registrations.json",
-         JSON.stringify(registrationsData, null, 2)
+         JSON.stringify(registrationsData, null, 2),
+         "utf8"
       );
 
       res.status(200).json({ message: "Registration deleted!" });
    } catch (error) {
+      console.error("Delete registration error:", error);
       res.status(500).json({
          message: "Failed to delete registration",
          error: error.message,
