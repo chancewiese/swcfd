@@ -9,6 +9,7 @@ import SponsorsPage from "../../pages/SponsorsPage";
 import ContactPage from "../../pages/ContactPage";
 import LoginPage from "../../pages/LoginPage";
 import PickleballPage from "../../pages/events/PickleballPage";
+import GolfPage from "../../pages/events/GolfPage";
 
 const Router = () => {
    return (
@@ -22,6 +23,7 @@ const Router = () => {
          <Route path="/contact" element={<ContactPage />} />
          <Route path="/login" element={<LoginPage />} />
          <Route path="/events/pickleball" element={<PickleballPage />} />
+         <Route path="/events/golf" element={<GolfPage />} />
          <Route path="*" element={<Navigate to="/" />} />
       </Routes>
    );

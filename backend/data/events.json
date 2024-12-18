@@ -1,104 +1,107 @@
 {
-  "events": [
-    {
-      "id": "1",
-      "title": "Pickleball Tournament",
-      "description": "Annual Pickleball Tournament",
-      "location": "Canyon Meadows Pickleball Courts",
-      "registrationId": "pickleball",
-      "segments": [
-        {
-          "id": "1-1",
-          "title": "Women's Doubles",
-          "date": "2025-08-01",
-          "time": "17:00",
-          "maxTeams": 16
-        },
-        {
-          "id": "1-2",
-          "title": "Men's Doubles",
-          "date": "2025-08-02",
-          "time": "18:00",
-          "maxTeams": null
-        },
-        {
-          "title": "Mixed Doubles",
-          "date": "2025-08-02",
-          "time": "19:00",
-          "maxTeams": 16,
-          "id": "temp-1733892772311"
-        },
-        {
-          "title": "Kids Doubles",
-          "date": "2025-08-01",
-          "time": "18:00",
-          "maxTeams": null,
-          "id": "temp-1733892813324"
-        }
-      ]
-    },
-    {
-      "id": "2",
-      "title": "Community Dinner",
-      "description": "Annual community dinner and social",
-      "location": "Community Center",
-      "registrationId": "dinner",
-      "date": "2025-08-04",
-      "time": "18:00",
-      "maxParticipants": 200
-    },
-    {
-      "id": "3",
-      "title": "Basketball Tournament",
-      "description": "3 on 3 basketball tournament",
-      "location": "South Weber Park",
-      "registrationId": "basketball",
-      "segments": [
-        {
-          "id": "3-1",
-          "title": "Youth Bracket",
-          "date": "2025-08-05",
-          "time": "09:00",
-          "maxTeams": 8
-        },
-        {
-          "id": "3-2",
-          "title": "Adult Bracket",
-          "date": "2025-08-05",
-          "time": "13:00",
-          "maxTeams": 8
-        }
-      ]
-    },
-    {
-      "id": "4",
-      "title": "Golf Tournament",
-      "description": "Annual Golf Tournament",
-      "location": "Riverside Golf Course",
-      "registrationId": "golf",
-      "segments": [
-        {
-          "id": "4-1",
-          "title": "Women's Teams",
-          "date": "2025-08-01",
-          "time": "18:00",
-          "maxTeams": 6
-        },
-        {
-          "id": "4-2",
-          "title": "Men's Teams",
-          "date": "2025-08-02",
-          "time": "19:00",
-          "maxTeams": 6
-        },
-        {
-          "id": "4-3",
-          "title": "Mixed Teams",
-          "date": "2025-08-02",
-          "time": "18:00",
-          "maxTeams": 6
-        }
-      ]
-    }
-  ]
+   "events": [
+      {
+         "id": "1",
+         "title": "Pickleball Tournament",
+         "description": "Annual Pickleball Tournament",
+         "images": [],
+         "location": "Canyon Meadows Pickleball Courts",
+         "registrationId": "pickleball",
+         "segments": [
+            {
+               "id": "1-1",
+               "title": "Women's Doubles",
+               "date": "2025-08-01",
+               "time": "17:00",
+               "maxTeams": 16
+            },
+            {
+               "id": "1-2",
+               "title": "Men's Doubles",
+               "date": "2025-08-02",
+               "time": "18:00",
+               "maxTeams": null
+            },
+            {
+               "title": "Mixed Doubles",
+               "date": "2025-08-02",
+               "time": "19:00",
+               "maxTeams": 16,
+               "id": "temp-1733892772311"
+            },
+            {
+               "title": "Kids Doubles",
+               "date": "2025-08-01",
+               "time": "18:00",
+               "maxTeams": null,
+               "id": "temp-1733892813324"
+            }
+         ]
+      },
+      {
+         "id": "2",
+         "title": "Community Dinner",
+         "description": "Annual community dinner and social",
+         "images": [],
+         "location": "Community Center",
+         "registrationId": "dinner",
+         "date": "2025-08-04",
+         "time": "18:00",
+         "maxParticipants": 200
+      },
+      {
+         "id": "3",
+         "title": "Basketball Tournament",
+         "description": "3 on 3 basketball tournament",
+         "location": "South Weber Park",
+         "registrationId": "basketball",
+         "segments": [
+            {
+               "id": "3-1",
+               "title": "Youth Bracket",
+               "date": "2025-08-05",
+               "time": "09:00",
+               "maxTeams": 8
+            },
+            {
+               "id": "3-2",
+               "title": "Adult Bracket",
+               "date": "2025-08-05",
+               "time": "13:00",
+               "maxTeams": 8
+            }
+         ]
+      },
+      {
+         "id": "4",
+         "title": "Golf Tournament",
+         "description": "Annual Golf Tournament",
+         "images": [],
+         "location": "Riverside Golf Course",
+         "registrationId": "golf",
+         "segments": [
+            {
+               "id": "4-1",
+               "title": "Women's Teams",
+               "date": "2025-08-01",
+               "time": "18:00",
+               "maxTeams": 6
+            },
+            {
+               "id": "4-2",
+               "title": "Men's Teams",
+               "date": "2025-08-02",
+               "time": "19:00",
+               "maxTeams": 6
+            },
+            {
+               "id": "4-3",
+               "title": "Mixed Teams",
+               "date": "2025-08-02",
+               "time": "18:00",
+               "maxTeams": null
+            }
+         ]
+      }
+   ]
 }

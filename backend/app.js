@@ -3,6 +3,9 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const fs = require("node:fs/promises");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs").promises;
 
 const app = express();
 
@@ -360,6 +363,138 @@ app.delete("/registrations/:registrationId/:id", async (req, res) => {
    } catch (error) {
       console.error("Error deleting registration:", error);
       res.status(500).json({ message: "Error deleting registration" });
+   }
+});
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, "uploads");
+fs.mkdir(uploadsDir, { recursive: true }).catch(console.error);
+
+// Configure multer for file upload
+const storage = multer.diskStorage({
+   destination: function (req, file, cb) {
+      cb(null, "uploads/");
+   },
+   filename: function (req, file, cb) {
+      // Create unique filename with original extension
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      cb(null, uniqueSuffix + path.extname(file.originalname));
+   },
+});
+
+const upload = multer({
+   storage: storage,
+   limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+   },
+   fileFilter: (req, file, cb) => {
+      // Accept only image files
+      if (file.mimetype.startsWith("image/")) {
+         cb(null, true);
+      } else {
+         cb(new Error("Not an image! Please upload an image."), false);
+      }
+   },
+});
+
+// Serve static files from uploads directory
+app.use("/uploads", express.static("uploads"));
+
+// Add these new routes to your app.js
+app.post(
+   "/events/:eventId/images/upload",
+   upload.single("image"),
+   async (req, res) => {
+      try {
+         if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+         }
+
+         const fileUrl = `/uploads/${req.file.filename}`;
+         const eventId = req.params.eventId;
+         const caption = req.body.caption || "";
+
+         // Read events data
+         const fileContent = await fs.readFile("./data/events.json", "utf8");
+         const eventsData = JSON.parse(fileContent);
+         const eventIndex = eventsData.events.findIndex(
+            (e) => e.id === eventId
+         );
+
+         if (eventIndex === -1) {
+            await fs.unlink(req.file.path); // Delete uploaded file
+            return res.status(404).json({ message: "Event not found" });
+         }
+
+         // Initialize images array if it doesn't exist
+         if (!eventsData.events[eventIndex].images) {
+            eventsData.events[eventIndex].images = [];
+         }
+
+         // Add new image
+         const newImage = {
+            id: `img-${Date.now()}`,
+            url: fileUrl,
+            caption,
+            order: eventsData.events[eventIndex].images.length,
+         };
+
+         eventsData.events[eventIndex].images.push(newImage);
+
+         // Save updated events data
+         await fs.writeFile(
+            "./data/events.json",
+            JSON.stringify(eventsData, null, 2)
+         );
+
+         res.status(201).json({
+            message: "Image uploaded successfully",
+            image: newImage,
+         });
+      } catch (error) {
+         console.error("Upload error:", error);
+         if (req.file) {
+            await fs.unlink(req.file.path).catch(console.error);
+         }
+         res.status(500).json({ message: "Failed to upload image" });
+      }
+   }
+);
+
+app.delete("/events/:eventId/images/:imageId", async (req, res) => {
+   try {
+      const { eventId, imageId } = req.params;
+
+      // Read events data
+      const fileContent = await fs.readFile("./data/events.json", "utf8");
+      const eventsData = JSON.parse(fileContent);
+      const event = eventsData.events.find((e) => e.id === eventId);
+
+      if (!event || !event.images) {
+         return res.status(404).json({ message: "Event or images not found" });
+      }
+
+      // Find image to delete
+      const imageToDelete = event.images.find((img) => img.id === imageId);
+      if (!imageToDelete) {
+         return res.status(404).json({ message: "Image not found" });
+      }
+
+      // Remove image file
+      const filePath = path.join(__dirname, imageToDelete.url);
+      await fs.unlink(filePath);
+
+      // Update events data
+      event.images = event.images.filter((img) => img.id !== imageId);
+      await fs.writeFile(
+         "./data/events.json",
+         JSON.stringify(eventsData, null, 2)
+      );
+
+      res.json({ message: "Image deleted successfully" });
+   } catch (error) {
+      console.error("Delete error:", error);
+      res.status(500).json({ message: "Failed to delete image" });
    }
 });
 
