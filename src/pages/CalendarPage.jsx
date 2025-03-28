@@ -1,19 +1,14 @@
 // src/pages/CalendarPage.jsx
-import { Container, Typography, Paper, Grid } from "@mui/material";
-
 const CalendarPage = () => {
-   return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-         <Typography variant="h3" gutterBottom>
-            Event Calendar
-         </Typography>
-         <Paper sx={{ p: 3 }}>
-            <Typography variant="body1">
-               Calendar component will be implemented here
-            </Typography>
-         </Paper>
-      </Container>
-   );
+  return (
+    <div className="container mt-4">
+      <h1 className="mb-4">Event Calendar</h1>
+
+      <div className="paper p-3">
+        <p>Calendar component will be implemented here</p>
+      </div>
+    </div>
+  );
 };
 
 export default CalendarPage;

@@ -1,115 +1,87 @@
 // src/components/layout/SidebarNav.jsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-   Drawer,
-   List,
-   ListItem,
-   ListItemIcon,
-   ListItemText,
-   ListItemButton,
-   Divider,
-   Box,
-   IconButton,
-   Typography,
-   Button,
-} from "@mui/material";
-import {
-   Menu,
-   Event,
-   CalendarMonth,
-   Info,
-   PhotoLibrary,
-   ContactSupport,
-   Store,
-   Login,
-   Logout,
-   Group,
-   Home,
-} from "@mui/icons-material";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 
-const SidebarNav = () => {
-   const navigate = useNavigate();
-   const { user, logout } = useAuth();
-   const [isOpen, setIsOpen] = useState(false);
+const SidebarNav = ({ open, onClose }) => {
+  const { user, logout } = useAuth();
+  const { darkMode, toggleTheme } = useTheme();
 
-   const navigationItems = [
-      { text: "Home", icon: <Home />, path: "/" },
-      { text: "Events", icon: <Event />, path: "/events" },
-      { text: "Calendar", icon: <CalendarMonth />, path: "/calendar" },
-      { text: "About CFD", icon: <Info />, path: "/about" },
-      { text: "Gallery", icon: <PhotoLibrary />, path: "/gallery" },
-      { text: "Sponsors", icon: <Group />, path: "/sponsors" },
-      { text: "Contact", icon: <ContactSupport />, path: "/contact" },
-   ];
+  const handleLogout = () => {
+    logout();
+    onClose();
+  };
 
-   const handleNavigation = (path) => {
-      navigate(path);
-      setIsOpen(false);
-   };
+  return (
+    <>
+      <div className={`drawer ${open ? "open" : ""}`}>
+        <div className="drawer-header">
+          <h2>Menu</h2>
+          <button className="drawer-close" onClick={onClose}>
+            ✕
+          </button>
+        </div>
 
-   const handleLogout = () => {
-      logout();
-      setIsOpen(false);
-      navigate("/");
-   };
+        <div className="drawer-content">
+          <nav className="sidebar-nav">
+            <Link to="/" className="sidebar-nav-item" onClick={onClose}>
+              Home
+            </Link>
+            <Link to="/events" className="sidebar-nav-item" onClick={onClose}>
+              Events
+            </Link>
+            <Link to="/about" className="sidebar-nav-item" onClick={onClose}>
+              About
+            </Link>
+            <Link to="/gallery" className="sidebar-nav-item" onClick={onClose}>
+              Gallery
+            </Link>
+            <Link to="/sponsors" className="sidebar-nav-item" onClick={onClose}>
+              Sponsors
+            </Link>
+            <Link to="/contact" className="sidebar-nav-item" onClick={onClose}>
+              Contact
+            </Link>
 
-   return (
-      <>
-         <IconButton color="inherit" onClick={() => setIsOpen(true)}>
-            <Menu />
-         </IconButton>
+            <div className="sidebar-divider"></div>
 
-         <Drawer anchor="left" open={isOpen} onClose={() => setIsOpen(false)}>
-            <Box
-               sx={{
-                  width: 250,
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-               }}
+            <button
+              className="sidebar-nav-item theme-toggle"
+              onClick={toggleTheme}
             >
-               {/* Title */}
-               <Box
-                  sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}
-               >
-                  <Store />
-                  <Typography variant="h6">South Weber CFD</Typography>
-               </Box>
+              {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+            </button>
 
-               <Divider />
+            {user ? (
+              <>
+                {user.isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="sidebar-nav-item"
+                    onClick={onClose}
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button className="sidebar-nav-item" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="sidebar-nav-item" onClick={onClose}>
+                Login
+              </Link>
+            )}
+          </nav>
+        </div>
+      </div>
 
-               {/* Navigation List */}
-               <List sx={{ flexGrow: 1 }}>
-                  {navigationItems.map((item) => (
-                     <ListItem key={item.text} disablePadding>
-                        <ListItemButton
-                           onClick={() => handleNavigation(item.path)}
-                        >
-                           <ListItemIcon>{item.icon}</ListItemIcon>
-                           <ListItemText primary={item.text} />
-                        </ListItemButton>
-                     </ListItem>
-                  ))}
-               </List>
-
-               <Divider />
-
-               {/* Login Button */}
-               <Button
-                  startIcon={user ? <Logout /> : <Login />}
-                  onClick={
-                     user ? handleLogout : () => handleNavigation("/login")
-                  }
-                  sx={{ justifyContent: "flex-start", color: "inherit" }}
-               >
-                  {user ? "Logout" : "Admin Login"}
-               </Button>
-            </Box>
-         </Drawer>
-      </>
-   );
+      {/* Backdrop */}
+      {open && (
+        <div className="drawer-backdrop visible" onClick={onClose}></div>
+      )}
+    </>
+  );
 };
 
 export default SidebarNav;

@@ -1,13 +1,34 @@
 // src/components/layout/Layout.jsx
-import { Box } from "@mui/material";
+import { Link } from "react-router-dom";
 import Header from "./Header";
 
 const Layout = ({ children }) => {
   return (
-    <Box>
+    <div className="page-container">
       <Header />
-      <Box sx={{ p: 3 }}>{children}</Box>
-    </Box>
+
+      <main className="main-content">{children}</main>
+
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-copyright">
+            &copy; {new Date().getFullYear()} Country Fair Days. All rights
+            reserved.
+          </div>
+          <ul className="footer-links">
+            <li className="footer-link">
+              <Link to="/about">About</Link>
+            </li>
+            <li className="footer-link">
+              <Link to="/contact">Contact</Link>
+            </li>
+            <li className="footer-link">
+              <Link to="/privacy">Privacy Policy</Link>
+            </li>
+          </ul>
+        </div>
+      </footer>
+    </div>
   );
 };
 

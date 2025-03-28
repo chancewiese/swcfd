@@ -1,29 +1,86 @@
 // src/components/layout/Header.jsx
-import { AppBar, Toolbar, Typography, Link } from "@mui/material";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import SidebarNav from "./SidebarNav";
-import { Link as RouterLink } from "react-router-dom";
 
 const Header = () => {
+  const { user } = useAuth();
+  const { darkMode, toggleTheme } = useTheme();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
-    <AppBar position="sticky">
-      <Toolbar sx={{ height: 80 }}>
-        <SidebarNav />
-        <Link
-          component={RouterLink}
-          to="/"
-          sx={{
-            ml: 2,
-            textDecoration: "none",
-            color: "inherit",
-            "&:hover": {
-              cursor: "pointer",
-            },
-          }}
-        >
-          <Typography variant="h6">South Weber CFD</Typography>
+    <>
+      <header className="navbar">
+        <Link to="/" className="navbar-brand">
+          Country Fair Days
         </Link>
-      </Toolbar>
-    </AppBar>
+
+        {/* Desktop Navigation */}
+        <nav className="navbar-nav desktop-nav">
+          <Link to="/" className="nav-link">
+            Home
+          </Link>
+          <Link to="/events" className="nav-link">
+            Events
+          </Link>
+          <Link to="/about" className="nav-link">
+            About
+          </Link>
+          <Link to="/gallery" className="nav-link">
+            Gallery
+          </Link>
+          <Link to="/sponsors" className="nav-link">
+            Sponsors
+          </Link>
+          <Link to="/contact" className="nav-link">
+            Contact
+          </Link>
+        </nav>
+
+        <div className="navbar-actions">
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={
+              darkMode ? "Switch to light mode" : "Switch to dark mode"
+            }
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+
+          {user ? (
+            <div className="user-menu">
+              <span className="user-name">{user.name}</span>
+              {user.isAdmin && (
+                <Link to="/admin" className="nav-link">
+                  Admin
+                </Link>
+              )}
+              <Link to="/logout" className="nav-link">
+                Logout
+              </Link>
+            </div>
+          ) : (
+            <Link to="/login" className="nav-link">
+              Login
+            </Link>
+          )}
+
+          <button className="mobile-menu-toggle" onClick={toggleSidebar}>
+            ☰
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Sidebar */}
+      <SidebarNav open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    </>
   );
 };
 

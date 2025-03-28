@@ -1,0 +1,115 @@
+/* src/styles/dark-theme.css */
+
+.dark-theme {
+  --color-primary: #90caf9;
+  --color-primary-dark: #64b5f6;
+  --color-primary-light: #bbdefb;
+  --color-secondary: #f48fb1;
+  --color-secondary-dark: #f06292;
+  --color-secondary-light: #f8bbd0;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #a0a0a0;
+  --color-text-disabled: #6c6c6c;
+  --color-background-default: #121212;
+  --color-background-paper: #1e1e1e;
+  --color-divider: #424242;
+  --color-error: #f44336;
+  --color-warning: #ff9800;
+  --color-info: #29b6f6;
+  --color-success: #66bb6a;
+}
+
+.dark-theme .card,
+.dark-theme .paper,
+.dark-theme .modal,
+.dark-theme .event-day {
+  background-color: var(--color-background-paper);
+}
+
+.dark-theme .form-control,
+.dark-theme .form-select {
+  background-color: var(--color-background-paper);
+  color: var(--color-text-primary);
+  border-color: var(--color-divider);
+}
+
+.dark-theme .form-control:focus,
+.dark-theme .form-select:focus {
+  border-color: var(--color-primary);
+}
+
+.dark-theme .navbar {
+  background-color: var(--color-background-paper);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .navbar-brand,
+.dark-theme .nav-link {
+  color: var(--color-text-primary);
+}
+
+.dark-theme .nav-link:hover,
+.dark-theme .nav-link:focus,
+.dark-theme .nav-link.active {
+  color: var(--color-primary);
+}
+
+.dark-theme .footer {
+  background-color: var(--color-background-paper);
+  border-top-color: var(--color-divider);
+}
+
+.dark-theme .btn-outlined-primary {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.dark-theme .btn-outlined-primary:hover {
+  background-color: var(--color-primary);
+  color: #000;
+}
+
+.dark-theme .table th,
+.dark-theme .table td {
+  border-color: var(--color-divider);
+}
+
+.dark-theme .table thead th {
+  border-bottom-color: var(--color-divider);
+}
+
+.dark-theme .table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .table-hover tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.075);
+}
+
+.dark-theme .btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #000;
+}
+
+.dark-theme .btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.dark-theme .event-segment-card {
+  border-color: var(--color-divider);
+}
+
+.dark-theme a {
+  color: var(--color-primary);
+}
+
+.dark-theme a:hover {
+  color: var(--color-primary-light);
+}
+
+.dark-theme .hero {
+  background-color: var(--color-primary-dark);
+  color: #000;
+}

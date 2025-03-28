@@ -1,56 +1,42 @@
 // src/pages/SponsorsPage.jsx
-import {
-   Container,
-   Typography,
-   Grid,
-   Card,
-   CardContent,
-   Button,
-} from "@mui/material";
-
 const SponsorsPage = () => {
-   const sponsors = [
-      {
-         name: "Local Business 1",
-         level: "Gold",
-         description: "Community supporter",
-      },
-      {
-         name: "Local Business 2",
-         level: "Silver",
-         description: "Event sponsor",
-      },
-      {
-         name: "Local Business 3",
-         level: "Bronze",
-         description: "Activity sponsor",
-      },
-   ];
+  const sponsors = [
+    {
+      name: "Local Business 1",
+      level: "Gold",
+      description: "Community supporter",
+    },
+    {
+      name: "Local Business 2",
+      level: "Silver",
+      description: "Event sponsor",
+    },
+    {
+      name: "Local Business 3",
+      level: "Bronze",
+      description: "Activity sponsor",
+    },
+  ];
 
-   return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-         <Typography variant="h3" gutterBottom>
-            Our Sponsors
-         </Typography>
-         <Grid container spacing={3}>
-            {sponsors.map((sponsor, index) => (
-               <Grid item xs={12} md={4} key={index}>
-                  <Card>
-                     <CardContent>
-                        <Typography variant="h6">{sponsor.name}</Typography>
-                        <Typography color="text.secondary">
-                           {sponsor.level}
-                        </Typography>
-                        <Typography variant="body2">
-                           {sponsor.description}
-                        </Typography>
-                     </CardContent>
-                  </Card>
-               </Grid>
-            ))}
-         </Grid>
-      </Container>
-   );
+  return (
+    <div className="container mt-4">
+      <h1 className="mb-4">Our Sponsors</h1>
+
+      <div className="grid">
+        {sponsors.map((sponsor, index) => (
+          <div className="col-12 col-md-4" key={index}>
+            <div className="card">
+              <div className="card-body">
+                <h2 className="card-title">{sponsor.name}</h2>
+                <p className="card-subtitle">{sponsor.level}</p>
+                <p className="card-text">{sponsor.description}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default SponsorsPage;
