@@ -1,107 +1,192 @@
-{
-   "events": [
+[
+  {
+    "title": "Summer Festival",
+    "description": "Annual summer celebration with music, food, and family activities. Join us for a weekend of fun in the sun with live entertainment, local food vendors, and activities for all ages.",
+    "location": "City Park, Main Street",
+    "startDate": "2025-08-05T09:00:00.000Z",
+    "endDate": "2025-08-10T18:00:00.000Z",
+    "imageGallery": [
       {
-         "id": "1",
-         "title": "Pickleball Tournament",
-         "description": "Annual Pickleball Tournament",
-         "images": [],
-         "location": "Canyon Meadows Pickleball Courts",
-         "registrationId": "pickleball",
-         "segments": [
-            {
-               "id": "1-1",
-               "title": "Women's Doubles",
-               "date": "2025-08-01",
-               "time": "17:00",
-               "maxTeams": 16
-            },
-            {
-               "id": "1-2",
-               "title": "Men's Doubles",
-               "date": "2025-08-02",
-               "time": "18:00",
-               "maxTeams": null
-            },
-            {
-               "title": "Mixed Doubles",
-               "date": "2025-08-02",
-               "time": "19:00",
-               "maxTeams": 16,
-               "id": "temp-1733892772311"
-            },
-            {
-               "title": "Kids Doubles",
-               "date": "2025-08-01",
-               "time": "18:00",
-               "maxTeams": null,
-               "id": "temp-1733892813324"
-            }
-         ]
+        "name": "Summer Festival Main Image",
+        "imageUrl": "/api/placeholder/800/400"
       },
       {
-         "id": "2",
-         "title": "Community Dinner",
-         "description": "Annual community dinner and social",
-         "images": [],
-         "location": "Community Center",
-         "registrationId": "dinner",
-         "date": "2025-08-04",
-         "time": "18:00",
-         "maxParticipants": 200
+        "name": "Food Vendors",
+        "imageUrl": "/api/placeholder/800/400"
       },
       {
-         "id": "3",
-         "title": "Basketball Tournament",
-         "description": "3 on 3 basketball tournament",
-         "location": "South Weber Park",
-         "registrationId": "basketball",
-         "segments": [
-            {
-               "id": "3-1",
-               "title": "Youth Bracket",
-               "date": "2025-08-05",
-               "time": "09:00",
-               "maxTeams": 8
-            },
-            {
-               "id": "3-2",
-               "title": "Adult Bracket",
-               "date": "2025-08-05",
-               "time": "13:00",
-               "maxTeams": 8
-            }
-         ]
-      },
-      {
-         "id": "4",
-         "title": "Golf Tournament",
-         "description": "Annual Golf Tournament",
-         "images": [],
-         "location": "Riverside Golf Course",
-         "registrationId": "golf",
-         "segments": [
-            {
-               "id": "4-1",
-               "title": "Women's Teams",
-               "date": "2025-08-01",
-               "time": "18:00",
-               "maxTeams": 6
-            },
-            {
-               "id": "4-2",
-               "title": "Men's Teams",
-               "date": "2025-08-02",
-               "time": "19:00",
-               "maxTeams": 6
-            },
-            {
-               "id": "4-3",
-               "title": "Mixed Teams",
-               "date": "2025-08-02",
-               "time": "18:00",
-               "maxTeams": null
-            }
-         ]
+        "name": "Music Stage",
+        "imageUrl": "/api/placeholder/800/400"
       }
-   ]
-}
+    ],
+    "isPublished": true,
+    "sections": [
+      {
+        "title": "Music Stage",
+        "description": "Live performances by local and regional bands throughout the weekend.",
+        "capacity": 500,
+        "registrationOpenDate": "2025-06-01T09:00:00.000Z"
+      },
+      {
+        "title": "Food Court",
+        "description": "Sample delicious offerings from over 20 local food vendors.",
+        "capacity": null,
+        "registrationOpenDate": null
+      },
+      {
+        "title": "Kids Zone",
+        "description": "Fun activities for children including face painting, bounce houses, and games.",
+        "capacity": 200,
+        "registrationOpenDate": "2025-06-15T09:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "title": "Golf Tournament",
+    "description": "Community golf tournament at Country Club Golf Course. Players of all skill levels are welcome to participate in this friendly competition.",
+    "location": "Country Club Golf Course",
+    "startDate": "2025-08-15T08:00:00.000Z",
+    "endDate": "2025-08-15T17:00:00.000Z",
+    "imageGallery": [
+      {
+        "name": "Golf Tournament Image",
+        "imageUrl": "/api/placeholder/800/400"
+      },
+      {
+        "name": "Golf Course",
+        "imageUrl": "/api/placeholder/800/400"
+      }
+    ],
+    "isPublished": true,
+    "sections": [
+      {
+        "title": "Pro Division",
+        "description": "For experienced golfers with handicaps under 12.",
+        "capacity": 40,
+        "registrationOpenDate": "2025-07-01T09:00:00.000Z"
+      },
+      {
+        "title": "Amateur Division",
+        "description": "For casual golfers of all skill levels.",
+        "capacity": 60,
+        "registrationDate": "2025-07-01T09:00:00.000Z"
+      },
+      {
+        "title": "Junior Division",
+        "description": "For young golfers aged 10-17.",
+        "capacity": 30,
+        "registrationOpenDate": "2025-07-05T09:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "title": "Pickleball Tournament",
+    "description": "Local pickleball tournament for all skill levels. Singles and doubles competitions available.",
+    "location": "Community Recreation Center",
+    "startDate": "2025-09-03T09:00:00.000Z",
+    "endDate": "2025-09-05T18:00:00.000Z",
+    "imageGallery": [
+      {
+        "name": "Pickleball Tournament Image",
+        "imageUrl": "/api/placeholder/800/400"
+      }
+    ],
+    "isPublished": true,
+    "sections": [
+      {
+        "title": "Singles Competition",
+        "description": "Individual players compete in age and skill-based brackets.",
+        "capacity": 32,
+        "registrationOpenDate": "2025-08-01T09:00:00.000Z"
+      },
+      {
+        "title": "Doubles Competition",
+        "description": "Team-based competition in various skill levels.",
+        "capacity": 24,
+        "registrationDate": "2025-08-01T09:00:00.000Z"
+      },
+      {
+        "title": "Mixed Doubles",
+        "description": "Co-ed teams compete in a friendly tournament.",
+        "capacity": 20,
+        "registrationOpenDate": "2025-08-05T09:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "title": "Harvest Fair",
+    "description": "Celebration of local agriculture with produce contests, farm exhibits, and traditional harvest games.",
+    "location": "Fairgrounds",
+    "startDate": "2025-09-25T10:00:00.000Z",
+    "endDate": "2025-09-27T19:00:00.000Z",
+    "imageGallery": [
+      {
+        "name": "Harvest Fair Main Image",
+        "imageUrl": "/api/placeholder/800/400"
+      },
+      {
+        "name": "Produce Contest",
+        "imageUrl": "/api/placeholder/800/400"
+      }
+    ],
+    "isPublished": true,
+    "sections": [
+      {
+        "title": "Produce Competition",
+        "description": "Showcase your garden's best fruits and vegetables in our annual contest.",
+        "capacity": null,
+        "registrationOpenDate": "2025-09-01T09:00:00.000Z"
+      },
+      {
+        "title": "Farm Equipment Display",
+        "description": "View historic and modern farm equipment from local farmers and collectors.",
+        "capacity": null,
+        "registrationDate": null
+      },
+      {
+        "title": "Livestock Showcase",
+        "description": "Local farmers showcase their prize livestock.",
+        "capacity": 50,
+        "registrationOpenDate": "2025-09-10T09:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "title": "Winter Festival",
+    "description": "Celebrate the winter season with ice sculptures, holiday markets, and seasonal entertainment.",
+    "location": "Town Square",
+    "startDate": "2025-12-10T16:00:00.000Z",
+    "endDate": "2025-12-20T22:00:00.000Z",
+    "imageGallery": [
+      {
+        "name": "Winter Festival Lights",
+        "imageUrl": "/api/placeholder/800/400"
+      },
+      {
+        "name": "Ice Sculptures",
+        "imageUrl": "/api/placeholder/800/400"
+      }
+    ],
+    "isPublished": true,
+    "sections": [
+      {
+        "title": "Holiday Market",
+        "description": "Shop for unique gifts from local artisans and vendors.",
+        "capacity": null,
+        "registrationDate": null
+      },
+      {
+        "title": "Ice Sculpture Contest",
+        "description": "Watch local artists create beautiful ice sculptures or enter the contest yourself.",
+        "capacity": 15,
+        "registrationOpenDate": "2025-11-15T09:00:00.000Z"
+      },
+      {
+        "title": "Holiday Performances",
+        "description": "Enjoy seasonal music and performances from local choirs and musicians.",
+        "capacity": 300,
+        "registrationDate": null
+      }
+    ]
+  }
+]
