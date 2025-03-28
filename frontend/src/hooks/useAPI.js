@@ -1,86 +1,116 @@
-// src/hooks/useAPI.jsx
+// src/hooks/useAPI.js
 import { useState, useCallback } from "react";
 import axios from "axios";
 
-// API base URL - hardcoded for development
-const API_BASE_URL = "http://localhost:3000";
+// Create axios instance with defaults
+const api = axios.create({
+  baseURL: "http://localhost:3000/api",
+  withCredentials: true,
+  timeout: 10000,
+});
 
 export const useAPI = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Configure axios with default base URL
-  const api = axios.create({
-    baseURL: API_BASE_URL,
-  });
+  // Generic request function
+  const request = useCallback(
+    async (method, url, data = null, options = {}) => {
+      setLoading(true);
+      setError(null);
 
-  // Mock implementation for getPublishedEvents
-  const getPublishedEvents = useCallback(() => {
-    // Return mock data instead of making API call
-    const mockEvents = [
-      {
-        id: "1",
-        title: "Summer Festival",
-        description:
-          "Annual summer celebration with music, food, and activities.",
-        location: "City Park",
-        registrationId: "summer-fest",
-        segments: [
-          {
-            id: "101",
-            title: "Family Day",
-            date: "2025-07-15",
-            time: "10:00",
-          },
-          {
-            id: "102",
-            title: "Concert Night",
-            date: "2025-07-16",
-            time: "18:00",
-          },
-        ],
-      },
-      {
-        id: "2",
-        title: "Golf Tournament",
-        description: "Annual charity golf tournament",
-        location: "Green Valley Golf Course",
-        registrationId: "golf",
-        segments: [
-          {
-            id: "201",
-            title: "Adult Division",
-            date: "2025-08-20",
-            time: "08:00",
-          },
-          {
-            id: "202",
-            title: "Senior Division",
-            date: "2025-08-21",
-            time: "09:00",
-          },
-        ],
-      },
-    ];
+      try {
+        const response = await api({
+          method,
+          url,
+          data: method !== "get" ? data : null,
+          params: method === "get" ? data : null,
+          ...options,
+        });
 
-    return Promise.resolve({ events: mockEvents });
-  }, []);
+        setLoading(false);
+        return response.data;
+      } catch (err) {
+        const errorMessage =
+          err.response?.data?.message || err.message || "An error occurred";
+        setError(errorMessage);
+        setLoading(false);
+        throw new Error(errorMessage);
+      }
+    },
+    []
+  );
+
+  // Convenience methods
+  const get = useCallback(
+    (url, params, options) => request("get", url, params, options),
+    [request]
+  );
+
+  const post = useCallback(
+    (url, data, options) => request("post", url, data, options),
+    [request]
+  );
+
+  const put = useCallback(
+    (url, data, options) => request("put", url, data, options),
+    [request]
+  );
+
+  const del = useCallback(
+    (url, options) => request("delete", url, null, options),
+    [request]
+  );
+
+  // Event-specific methods
+  const getEvents = useCallback(() => get("/events"), [get]);
+
+  const getEvent = useCallback((idOrSlug) => get(`/events/${idOrSlug}`), [get]);
+
+  const createEvent = useCallback(
+    (eventData) => post("/events", eventData),
+    [post]
+  );
+
+  const updateEvent = useCallback(
+    (id, eventData) => put(`/events/${id}`, eventData),
+    [put]
+  );
+
+  const deleteEvent = useCallback((id) => del(`/events/${id}`), [del]);
+
+  const addEventSection = useCallback(
+    (eventId, sectionData) => post(`/events/${eventId}/sections`, sectionData),
+    [post]
+  );
+
+  const updateEventSection = useCallback(
+    (eventId, sectionId, sectionData) =>
+      put(`/events/${eventId}/sections/${sectionId}`, sectionData),
+    [put]
+  );
+
+  const deleteEventSection = useCallback(
+    (eventId, sectionId) => del(`/events/${eventId}/sections/${sectionId}`),
+    [del]
+  );
 
   return {
     loading,
     error,
-    getPublishedEvents,
-    // Other methods will be mock implementations
-    getEventByRegistrationId: () => Promise.resolve({ event: {} }),
-    updateEvent: () => Promise.resolve({}),
-    deleteEventSegment: () => Promise.resolve({}),
-    getRegistrations: () => Promise.resolve({ registrants: [] }),
-    createRegistration: () => Promise.resolve({}),
-    updateRegistration: () => Promise.resolve({}),
-    deleteRegistration: () => Promise.resolve({}),
-    getEventImages: () => Promise.resolve([]),
-    uploadEventImage: () => Promise.resolve({ image: {} }),
-    deleteEventImage: () => Promise.resolve({}),
-    reorderEventImages: () => Promise.resolve([]),
+    get,
+    post,
+    put,
+    delete: del,
+    getEvents,
+    getEvent,
+    createEvent,
+    updateEvent,
+    deleteEvent,
+    addEventSection,
+    updateEventSection,
+    deleteEventSection,
   };
 };
+
+export default useAPI;

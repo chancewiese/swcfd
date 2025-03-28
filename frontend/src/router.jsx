@@ -1,26 +1,27 @@
-// src/Router.jsx
+<Route
+  path="/events/:slug"
+  element={
+    <Layout>
+      <EventPage />
+    </Layout>
+  }
+/>; // src/router.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 
 // Import pages
 import HomePage from "./pages/HomePage";
-import AboutPage from "./pages/AboutPage";
 import EventsPage from "./pages/EventsPage";
-import ContactPage from "./pages/ContactPage";
-import GalleryPage from "./pages/GalleryPage";
-import SponsorsPage from "./pages/SponsorsPage";
-import CalendarPage from "./pages/CalendarPage";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import ProfilePage from "./pages/ProfilePage";
-import MyRegistrationsPage from "./pages/MyRegistrationsPage";
+import EventPage from "./pages/EventPage";
+import EditEventPage from "./pages/EditEventPage";
 
-// Import event pages (if available)
-import GolfPage from "./pages/events/GolfPage";
-import PickleballPage from "./pages/events/PickleballPage";
-
-// Import protected route component
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+// Empty placeholder component for pages that aren't implemented yet
+const PlaceholderPage = ({ title }) => (
+  <div style={{ textAlign: "center", padding: "2rem" }}>
+    <h1>{title}</h1>
+    <p>This page is under construction.</p>
+  </div>
+);
 
 const Router = () => {
   return (
@@ -34,14 +35,6 @@ const Router = () => {
         }
       />
       <Route
-        path="/about"
-        element={
-          <Layout>
-            <AboutPage />
-          </Layout>
-        }
-      />
-      <Route
         path="/events"
         element={
           <Layout>
@@ -50,42 +43,19 @@ const Router = () => {
         }
       />
       <Route
-        path="/events/golf"
+        path="/events/edit/:id"
         element={
           <Layout>
-            <GolfPage />
+            <EditEventPage />
           </Layout>
         }
       />
+
       <Route
-        path="/events/pickleball"
+        path="/events/:slug"
         element={
           <Layout>
-            <PickleballPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/contact"
-        element={
-          <Layout>
-            <ContactPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/gallery"
-        element={
-          <Layout>
-            <GalleryPage />
-          </Layout>
-        }
-      />
-      <Route
-        path="/sponsors"
-        element={
-          <Layout>
-            <SponsorsPage />
+            <EventPage />
           </Layout>
         }
       />
@@ -93,56 +63,43 @@ const Router = () => {
         path="/calendar"
         element={
           <Layout>
-            <CalendarPage />
+            <PlaceholderPage title="Event Calendar" />
           </Layout>
         }
       />
       <Route
-        path="/login"
+        path="/gallery"
         element={
           <Layout>
-            <LoginPage />
+            <PlaceholderPage title="Photo Gallery" />
           </Layout>
         }
       />
       <Route
-        path="/signup"
+        path="/sponsors"
         element={
           <Layout>
-            <SignupPage />
-          </Layout>
-        }
-      />
-
-      {/* User account pages */}
-      <Route
-        path="/profile"
-        element={
-          <Layout>
-            <ProfilePage />
+            <PlaceholderPage title="Sponsors" />
           </Layout>
         }
       />
       <Route
-        path="/my-registrations"
+        path="/about"
         element={
           <Layout>
-            <MyRegistrationsPage />
+            <PlaceholderPage title="About Us" />
           </Layout>
         }
       />
-
-      {/* Admin routes */}
       <Route
-        path="/admin/*"
+        path="/contact"
         element={
           <Layout>
-            <ProtectedRoute requireAdmin={true}>
-              <div>Admin Dashboard (To be implemented)</div>
-            </ProtectedRoute>
+            <PlaceholderPage title="Contact Us" />
           </Layout>
         }
       />
+      {/* Login route removed */}
 
       {/* Add a fallback route */}
       <Route path="*" element={<Navigate to="/" />} />

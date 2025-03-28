@@ -1,25 +1,25 @@
 // src/pages/HomePage.jsx
-import "./HomePage.css";
+import { Link } from "react-router-dom";
+import "./styles/HomePage.css";
 
 function HomePage() {
   return (
     <div className="home-container">
-      <header>
+      <div className="home-header">
         <h1>Country Fair Days</h1>
         <p>Community Events and Recreation</p>
-      </header>
+      </div>
 
-      <main>
-        <section className="welcome-section">
-          <h2>Welcome to Country Fair Days</h2>
-          <p>Join us for fun community events throughout the year.</p>
+      <section className="welcome-section">
+        <h2>Welcome to Country Fair Days</h2>
+        <p>
+          Join us for fun community events throughout the year. From festivals
+          to sports tournaments, there's something for everyone.
+        </p>
+        <Link to="/events">
           <button className="primary-button">View Events</button>
-        </section>
-      </main>
-
-      <footer>
-        <p>&copy; {new Date().getFullYear()} Country Fair Days</p>
-      </footer>
+        </Link>
+      </section>
     </div>
   );
 }

@@ -1,27 +1,23 @@
 {
-  "name": "backend",
+  "name": "country-fair-days-backend",
   "version": "1.0.0",
-  "description": "Country Fair Days backend API",
+  "description": "Backend for Country Fair Days application",
+  "main": "app.js",
   "scripts": {
     "start": "node main.js",
     "dev": "nodemon main.js",
-    "test": "jest --verbose"
+    "init-db": "node util/db-init.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "axios": "^1.7.7",
-    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
-    "connect-mongo": "^5.1.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.4.1",
     "express": "^4.18.2",
-    "express-session": "^1.18.0",
-    "mongoose": "^8.13.0",
-    "multer": "^1.4.5-lts.1"
+    "mongoose": "^8.1.1",
+    "slugify": "^1.6.6"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "nodemon": "^3.1.0",
-    "supertest": "^7.0.0"
+    "nodemon": "^3.0.3"
   }
 }
