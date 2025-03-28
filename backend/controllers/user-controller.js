@@ -4,7 +4,7 @@ const User = require("../models/user-model");
 // Register a new user
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { firstName, lastName, email, password, phone } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -17,7 +17,8 @@ exports.register = async (req, res) => {
 
     // Create new user
     const user = new User({
-      name,
+      firstName,
+      lastName,
       email,
       password,
       phone,
@@ -146,6 +147,58 @@ exports.getCurrentUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to get current user",
+      error: error.message,
+    });
+  }
+};
+
+// Update user profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, phone, currentPassword, newPassword } =
+      req.body;
+
+    // Find user
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Update fields
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (phone !== undefined) user.phone = phone;
+
+    // Handle password change if requested
+    if (currentPassword && newPassword) {
+      // Verify current password
+      const isMatch = await user.comparePassword(currentPassword);
+      if (!isMatch) {
+        return res.status(400).json({
+          success: false,
+          message: "Current password is incorrect",
+        });
+      }
+
+      // Set new password (will be hashed by pre-save hook)
+      user.password = newPassword;
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: user.toJSON(),
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update profile",
       error: error.message,
     });
   }

@@ -3,7 +3,11 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
 const UserSchema = new mongoose.Schema({
-  name: {
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
     type: String,
     required: true,
   },
@@ -65,5 +69,10 @@ UserSchema.methods.toJSON = function () {
   delete user.password;
   return user;
 };
+
+// Virtual for full name
+UserSchema.virtual("fullName").get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
 
 module.exports = mongoose.model("User", UserSchema);

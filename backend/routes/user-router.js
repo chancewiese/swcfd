@@ -16,4 +16,7 @@ router.post("/logout", userController.logout);
 // Get current user (protected route)
 router.get("/me", authenticate, userController.getCurrentUser);
 
+// Update user profile (protected route)
+router.put("/profile", authenticate, userController.updateProfile);
+
 module.exports = router;

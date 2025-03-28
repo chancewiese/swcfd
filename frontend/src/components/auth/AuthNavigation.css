@@ -1,0 +1,81 @@
+/* src/components/auth/AuthNavigation.css */
+
+.auth-navigation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-greeting {
+  font-size: 0.9rem;
+  color: white;
+  margin-right: 0.5rem;
+}
+
+.auth-link {
+  color: white;
+  text-decoration: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.auth-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.signup-link {
+  background-color: white;
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.signup-link:hover {
+  background-color: #f0f0f0;
+}
+
+.logout-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.admin-link {
+  background-color: #f59e0b;
+  color: white;
+  text-decoration: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.admin-link:hover {
+  background-color: #d97706;
+}
+
+.auth-nav-loading {
+  color: white;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .auth-navigation {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .user-greeting {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+}

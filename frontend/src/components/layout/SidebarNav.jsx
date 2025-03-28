@@ -1,9 +1,8 @@
 // src/components/layout/SidebarNav.jsx
+import { Link } from "react-router-dom";
 import "./SidebarNav.css";
 
 function SidebarNav({ isOpen, closeSidebar }) {
-  const isLoggedIn = localStorage.getItem("user") !== null;
-
   return (
     <>
       <div className={`sidebar ${isOpen ? "open" : ""}`}>
@@ -14,51 +13,27 @@ function SidebarNav({ isOpen, closeSidebar }) {
           </button>
         </div>
         <nav className="sidebar-nav">
-          <a href="/" onClick={closeSidebar}>
+          <Link to="/" onClick={closeSidebar}>
             Home
-          </a>
-          <a href="/events" onClick={closeSidebar}>
+          </Link>
+          <Link to="/events" onClick={closeSidebar}>
             Events
-          </a>
-          <a href="/calendar" onClick={closeSidebar}>
+          </Link>
+          <Link to="/calendar" onClick={closeSidebar}>
             Event Calendar
-          </a>
-          <a href="/gallery" onClick={closeSidebar}>
+          </Link>
+          <Link to="/gallery" onClick={closeSidebar}>
             Photo Gallery
-          </a>
-          <a href="/sponsors" onClick={closeSidebar}>
+          </Link>
+          <Link to="/sponsors" onClick={closeSidebar}>
             Sponsors
-          </a>
-          <a href="/about" onClick={closeSidebar}>
+          </Link>
+          <Link to="/about" onClick={closeSidebar}>
             About
-          </a>
-          <a href="/contact" onClick={closeSidebar}>
+          </Link>
+          <Link to="/contact" onClick={closeSidebar}>
             Contact
-          </a>
-
-          <div className="sidebar-divider"></div>
-
-          {isLoggedIn ? (
-            <button
-              className="sidebar-nav-item"
-              onClick={() => {
-                localStorage.removeItem("user");
-                window.location.href = "/";
-                closeSidebar();
-              }}
-            >
-              Sign Out
-            </button>
-          ) : (
-            <>
-              <a href="/login" onClick={closeSidebar}>
-                Sign In
-              </a>
-              <a href="/signup" onClick={closeSidebar}>
-                Create Account
-              </a>
-            </>
-          )}
+          </Link>
         </nav>
       </div>
 
