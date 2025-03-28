@@ -2,12 +2,15 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 require("dotenv").config();
 
 // Import DB connection
 const { connectDB } = require("./db");
 
-// Import routes (these would be your route files)
+// Import routes
+const userRoutes = require("./routes/user-router");
 const eventRoutes = require("./routes/events");
 const adminRoutes = require("./routes/admin");
 const registrationRoutes = require("./routes/registrations");
@@ -15,7 +18,12 @@ const registrationRoutes = require("./routes/registrations");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173", // Your frontend URL
+    credentials: true, // Allow cookies with CORS
+  })
+);
 app.use(express.json());
 app.use(
   bodyParser.json({
@@ -28,14 +36,38 @@ app.use(
 );
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Session configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your_session_secret",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 14 * 24 * 60 * 60, // 14 days
+      autoRemove: "native",
+    }),
+    cookie: {
+      httpOnly: true,
+      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days in milliseconds
+      secure: process.env.NODE_ENV === "production", // Set to true in production
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    },
+  })
+);
+
 // CORS headers
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    process.env.CLIENT_URL || "http://localhost:5173"
+  );
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
 
   // Handle preflight
   if (req.method === "OPTIONS") {
@@ -47,9 +79,10 @@ app.use((req, res, next) => {
 });
 
 // Mount routes
-app.use("/admin", adminRoutes);
-app.use("/events", eventRoutes);
-app.use("/registrations", registrationRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/registrations", registrationRoutes);
 
 // 404 Handler
 app.use((req, res) => {

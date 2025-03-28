@@ -1,0 +1,40 @@
+/* src/pages/HomePage.css */
+
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+main {
+  flex: 1;
+  padding: 2rem 1rem;
+}
+
+.welcome-section {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.primary-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+footer {
+  background-color: #f5f5f5;
+  padding: 1rem;
+  text-align: center;
+}

@@ -1,0 +1,61 @@
+/* src/components/layout/Header.css */
+.header {
+  background-color: var(--primary-color);
+  padding: 1rem;
+  color: white;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hamburger-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+.site-title a {
+  color: white;
+  text-decoration: none;
+}
+
+.site-title a:visited {
+  color: white;
+}
+
+.site-title a:hover {
+  color: white;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.desktop-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.desktop-nav a {
+  color: white;
+  text-decoration: none;
+}
+
+.desktop-nav a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none;
+  }
+}
