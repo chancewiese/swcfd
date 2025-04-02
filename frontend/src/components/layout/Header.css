@@ -1,4 +1,4 @@
-/* src/components/layout/Header.css */
+/* frontend/src/components/layout/Header.css */
 .header {
   background-color: var(--primary-color);
   padding: 1rem;
@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -45,9 +45,3 @@
   color: white;
   text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
 }
-
-/* Removed desktop-nav styles */
-
-/* Removed auth navigation */
-
-/* Removed media queries for desktop-nav */

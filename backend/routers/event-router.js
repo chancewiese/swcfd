@@ -15,6 +15,9 @@ router.post("/", eventController.createEvent);
 // Update event
 router.put("/:id", eventController.updateEvent);
 
+// Update event by slug
+router.put("/bySlug/:slug", eventController.updateEventBySlug);
+
 // Delete event
 router.delete("/:id", eventController.deleteEvent);
 

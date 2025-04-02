@@ -1,4 +1,4 @@
-// frontend/src/hooks/useAPI.js
+// frontend/src/hooks/api/useApiCore.js
 import { useState, useCallback } from "react";
 import axios from "axios";
 
@@ -9,7 +9,7 @@ const api = axios.create({
   timeout: 10000,
 });
 
-export const useAPI = () => {
+export const useApiCore = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -46,53 +46,17 @@ export const useAPI = () => {
     (url, params, options) => request("get", url, params, options),
     [request]
   );
-
   const post = useCallback(
     (url, data, options) => request("post", url, data, options),
     [request]
   );
-
   const put = useCallback(
     (url, data, options) => request("put", url, data, options),
     [request]
   );
-
   const del = useCallback(
     (url, options) => request("delete", url, null, options),
     [request]
-  );
-
-  // Event-specific methods
-  const getEvents = useCallback(() => get("/events"), [get]);
-
-  const getEvent = useCallback((idOrSlug) => get(`/events/${idOrSlug}`), [get]);
-
-  const createEvent = useCallback(
-    (eventData) => post("/events", eventData),
-    [post]
-  );
-
-  const updateEvent = useCallback(
-    (id, eventData) => put(`/events/${id}`, eventData),
-    [put]
-  );
-
-  const deleteEvent = useCallback((id) => del(`/events/${id}`), [del]);
-
-  const addEventSection = useCallback(
-    (eventId, sectionData) => post(`/events/${eventId}/sections`, sectionData),
-    [post]
-  );
-
-  const updateEventSection = useCallback(
-    (eventId, sectionId, sectionData) =>
-      put(`/events/${eventId}/sections/${sectionId}`, sectionData),
-    [put]
-  );
-
-  const deleteEventSection = useCallback(
-    (eventId, sectionId) => del(`/events/${eventId}/sections/${sectionId}`),
-    [del]
   );
 
   return {
@@ -102,15 +66,5 @@ export const useAPI = () => {
     post,
     put,
     delete: del,
-    getEvents,
-    getEvent,
-    createEvent,
-    updateEvent,
-    deleteEvent,
-    addEventSection,
-    updateEventSection,
-    deleteEventSection,
   };
 };
-
-export default useAPI;

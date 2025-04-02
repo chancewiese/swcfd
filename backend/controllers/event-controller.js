@@ -7,7 +7,7 @@ const slugify = require("slugify");
 // Get all events
 exports.getAllEvents = async (req, res, next) => {
   try {
-    const events = await Event.find({ isPublished: true }).sort({
+    const events = await Event.find().sort({
       startDate: 1,
     });
 
@@ -129,6 +129,45 @@ exports.updateEvent = async (req, res, next) => {
   }
 };
 
+// Update event by slug
+exports.updateEventBySlug = async (req, res, next) => {
+  try {
+    const slug = req.params.slug;
+
+    // Ensure titleSlug is updated if title changes
+    if (req.body.title) {
+      req.body.titleSlug = slugify(req.body.title, {
+        lower: true,
+        strict: true,
+        remove: /[*+~.()'"!:@]/g,
+      });
+    }
+
+    const event = await Event.findOneAndUpdate({ titleSlug: slug }, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: event,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 // Delete event
 exports.deleteEvent = async (req, res, next) => {
   try {
@@ -170,6 +209,15 @@ exports.addEventSection = async (req, res, next) => {
   try {
     const eventId = req.params.id;
 
+    // First find the event to make sure it exists
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
     // Ensure section data has slug
     if (req.body.title) {
       req.body.slug = slugify(req.body.title, { lower: true, trim: true });
@@ -179,22 +227,9 @@ exports.addEventSection = async (req, res, next) => {
     const section = new EventSection(req.body);
     await section.save();
 
-    // Add section to event
-    const event = await Event.findByIdAndUpdate(
-      eventId,
-      { $push: { sections: section._id } },
-      { new: true }
-    );
-
-    if (!event) {
-      // Clean up the section if the event doesn't exist
-      await section.deleteOne();
-
-      return res.status(404).json({
-        success: false,
-        message: "Event not found",
-      });
-    }
+    // Add section to event's sections array
+    event.sections.push(section._id);
+    await event.save();
 
     res.status(201).json({
       success: true,

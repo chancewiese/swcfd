@@ -1,4 +1,4 @@
-// models/event-model.js
+// backend/models/event-model.js
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const slugify = require("slugify");
@@ -33,17 +33,12 @@ const EventSchema = new Schema(
     startDate: {
       type: Date,
       required: false,
-      default: Date.now,
+      default: null, // Changed from Date.now to null
     },
     endDate: {
       type: Date,
       required: false,
-      default: function () {
-        // Default to 1 day after startDate
-        const date = new Date();
-        date.setDate(date.getDate() + 1);
-        return date;
-      },
+      default: null, // Changed from function to null
     },
     imageGallery: [
       {
@@ -67,6 +62,12 @@ const EventSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    sections: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "EventSection",
+      },
+    ],
   },
   { timestamps: true }
 );

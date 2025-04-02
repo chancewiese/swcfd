@@ -2,13 +2,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
-import useAPI from "../hooks/useAPI";
+import useEvents from "../hooks/useEvents";
 import "./styles/EventPage.css";
 
 function EventPage() {
   const { slug } = useParams();
   const [event, setEvent] = useState(null);
-  const { getEvent, loading, error } = useAPI();
+  const { getEvent, loading, error } = useEvents();
 
   useEffect(() => {
     const fetchEvent = async () => {

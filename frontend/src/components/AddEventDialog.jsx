@@ -1,12 +1,12 @@
-// src/components/AddEventDialog.jsx
+// frontend/src/components/AddEventDialog.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useAPI from "../hooks/useAPI";
+import useEvents from "../hooks/useEvents";
 import "./AddEventDialog.css";
 
 function AddEventDialog({ isOpen, onClose }) {
   const navigate = useNavigate();
-  const { createEvent, loading, error } = useAPI();
+  const { createEvent, loading, error } = useEvents();
 
   const [title, setTitle] = useState("");
   const [submitError, setSubmitError] = useState("");
@@ -22,20 +22,19 @@ function AddEventDialog({ isOpen, onClose }) {
     }
 
     try {
-      // Just create a minimal event with title
+      // Create event with minimal data - just the title
       const response = await createEvent({
         title,
-        // Default data
-        description: "Event description",
-        location: "TBD",
-        imageGallery: [
-          { name: "Event Image", imageUrl: "/api/placeholder/800/400" },
-        ],
+        description: "",
+        location: "",
+        isPublished: false,
+        imageGallery: [],
+        sections: [],
       });
 
       // Navigate to the edit page for the newly created event
-      if (response && response.data && response.data._id) {
-        navigate(`/events/edit/${response.data._id}`);
+      if (response && response.data && response.data.titleSlug) {
+        navigate(`/events/edit/${response.data.titleSlug}`);
       } else {
         onClose();
       }
@@ -62,6 +61,7 @@ function AddEventDialog({ isOpen, onClose }) {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter event title"
               autoFocus
+              required
             />
           </div>
 

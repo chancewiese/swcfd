@@ -43,7 +43,7 @@ const Router = () => {
         }
       />
       <Route
-        path="/events/edit/:id"
+        path="/events/edit/:slug"
         element={
           <Layout>
             <EditEventPage />
