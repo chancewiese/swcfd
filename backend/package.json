@@ -2,10 +2,9 @@
   "name": "country-fair-days-backend",
   "version": "1.0.0",
   "description": "Backend for Country Fair Days application",
-  "main": "app.js",
   "scripts": {
-    "start": "node main.js",
-    "dev": "nodemon main.js",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "init-db": "node util/db-init.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
