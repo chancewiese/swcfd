@@ -50,7 +50,8 @@ const EventSchema = new Schema(
         imageUrl: {
           type: String,
           required: false,
-          default: "/api/placeholder/800/400",
+          default:
+            "/api/images/placeholder_south-weber-central-park-playground.jpg",
         },
       },
     ],

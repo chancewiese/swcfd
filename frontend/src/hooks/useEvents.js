@@ -7,35 +7,60 @@ const useEvents = () => {
 
   // Event-specific methods
   const getEvents = useCallback(() => get("/events"), [get]);
-  const getEvent = useCallback((idOrSlug) => get(`/events/${idOrSlug}`), [get]);
+
+  // Get event by slug
+  const getEvent = useCallback((slug) => get(`/events/${slug}`), [get]);
+
+  // Create event
   const createEvent = useCallback(
     (eventData) => post("/events", eventData),
     [post]
   );
+
+  // Update event by slug
   const updateEvent = useCallback(
-    (id, eventData) => put(`/events/${id}`, eventData),
+    (slug, eventData) => put(`/events/${slug}`, eventData),
     [put]
   );
 
-  const updateEventBySlug = useCallback(
-    (slug, eventData) => put(`/events/bySlug/${slug}`, eventData),
-    [put]
+  // Delete event by slug
+  const deleteEvent = useCallback((slug) => del(`/events/${slug}`), [del]);
+
+  // Image-specific methods
+  const getEventImages = useCallback(
+    (slug) => get(`/events/${slug}/images`),
+    [get]
   );
 
-  const deleteEvent = useCallback((id) => del(`/events/${id}`), [del]);
+  const uploadEventImage = useCallback(
+    (slug, formData) => {
+      // For file uploads, we don't need to manually set Content-Type
+      // It will be set automatically with the proper boundary
+      return post(`/events/${slug}/images/upload`, formData);
+    },
+    [post]
+  );
+
+  const deleteEventImage = useCallback(
+    (slug, imageId) => del(`/events/${slug}/images/${imageId}`),
+    [del]
+  );
 
   // Section-specific methods
   const addEventSection = useCallback(
-    (eventId, sectionData) => post(`/events/${eventId}/sections`, sectionData),
+    (eventSlug, sectionData) =>
+      post(`/events/${eventSlug}/sections`, sectionData),
     [post]
   );
+
   const updateEventSection = useCallback(
-    (eventId, sectionId, sectionData) =>
-      put(`/events/${eventId}/sections/${sectionId}`, sectionData),
+    (eventSlug, sectionId, sectionData) =>
+      put(`/events/${eventSlug}/sections/${sectionId}`, sectionData),
     [put]
   );
+
   const deleteEventSection = useCallback(
-    (eventId, sectionId) => del(`/events/${eventId}/sections/${sectionId}`),
+    (eventSlug, sectionId) => del(`/events/${eventSlug}/sections/${sectionId}`),
     [del]
   );
 
@@ -46,8 +71,10 @@ const useEvents = () => {
     getEvent,
     createEvent,
     updateEvent,
-    updateEventBySlug,
     deleteEvent,
+    getEventImages, // New method
+    uploadEventImage, // New method
+    deleteEventImage, // New method
     addEventSection,
     updateEventSection,
     deleteEventSection,

@@ -1,110 +1,180 @@
-// frontend/src/pages/EditEventPage.jsx
+// src/pages/EditEventPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useEvents from "../hooks/useEvents";
+import ImageGallery from "../components/ImageGallery";
+import axios from "axios";
 import "./styles/EditEventPage.css";
+
+// Material UI imports
+import {
+  TextField,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Typography,
+  Paper,
+  Box,
+  IconButton,
+  Alert,
+  FormGroup,
+  Divider,
+  Switch,
+  CircularProgress,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import SaveIcon from "@mui/icons-material/Save";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
+// Get API URL from environment variables
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 function EditEventPage() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const isEditMode = !!slug;
   const { getEvent, createEvent, updateEvent, loading, error } = useEvents();
+
+  // State variables
   const [successMessage, setSuccessMessage] = useState("");
   const [eventId, setEventId] = useState(null);
   const [validationError, setValidationError] = useState(null);
-
-  // Form state
+  const [galleryImages, setGalleryImages] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     location: "",
-    startDate: "", // Empty string indicates no date selected
-    startTime: "", // Empty string indicates no time
-    endDate: "", // Empty string indicates no date selected
-    endTime: "", // Empty string indicates no time
-    isPublished: false, // Default to unpublished
-    includeStartTime: false, // Default to not including time
-    includeEndTime: false, // Default to not including time
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
+    isPublished: false,
+    includeStartTime: false,
+    includeEndTime: false,
     imageGallery: [],
     sections: [],
   });
 
-  // Fetch event data when in edit mode
+  // Fetch event data when component loads in edit mode
   useEffect(() => {
-    const fetchEvent = async () => {
-      if (isEditMode) {
-        try {
-          const response = await getEvent(slug);
-          const event = response.data;
-
-          if (event) {
-            setEventId(event._id);
-
-            // Initialize form data
-            const formDataInitial = {
-              title: event.title || "",
-              description: event.description || "",
-              location: event.location || "",
-              startDate: "",
-              startTime: "",
-              endDate: "",
-              endTime: "",
-              isPublished:
-                event.isPublished !== undefined ? event.isPublished : false,
-              includeStartTime: false,
-              includeEndTime: false,
-              imageGallery:
-                event.imageGallery && event.imageGallery.length > 0
-                  ? event.imageGallery
-                  : [],
-              sections:
-                event.sections && event.sections.length > 0
-                  ? event.sections.map((section) => ({
-                      ...section,
-                      registrationOpenDate: section.registrationOpenDate
-                        ? new Date(section.registrationOpenDate)
-                            .toISOString()
-                            .split("T")[0]
-                        : "",
-                    }))
-                  : [],
-            };
-
-            // If dates exist, format them
-            if (event.startDate) {
-              const startDate = new Date(event.startDate);
-              formDataInitial.startDate = startDate.toISOString().split("T")[0];
-
-              // Check if time is midnight to determine if time was included
-              const startTimeStr = startDate.toTimeString().substring(0, 5);
-              formDataInitial.includeStartTime = startTimeStr !== "00:00";
-              if (formDataInitial.includeStartTime) {
-                formDataInitial.startTime = startTimeStr;
-              }
-            }
-
-            if (event.endDate) {
-              const endDate = new Date(event.endDate);
-              formDataInitial.endDate = endDate.toISOString().split("T")[0];
-
-              // Check if time is 23:59:59 to determine if time was included
-              const endTimeStr = endDate.toTimeString().substring(0, 5);
-              formDataInitial.includeEndTime = endTimeStr !== "23:59";
-              if (formDataInitial.includeEndTime) {
-                formDataInitial.endTime = endTimeStr;
-              }
-            }
-
-            setFormData(formDataInitial);
-          }
-        } catch (err) {
-          console.error("Failed to fetch event:", err);
-        }
-      }
-    };
-
-    fetchEvent();
+    if (isEditMode) {
+      fetchEventData();
+      // Removed the separate fetchEventImages call since images are included in event data
+    }
   }, [slug, getEvent, isEditMode]);
+
+  // Function to fetch event data
+  const fetchEventData = async () => {
+    try {
+      const response = await getEvent(slug);
+      const event = response.data;
+
+      if (event) {
+        setEventId(event._id);
+
+        // IMPORTANT: Set gallery images from the event data
+        if (event.imageGallery && event.imageGallery.length > 0) {
+          console.log(
+            "Setting gallery images from event data:",
+            event.imageGallery
+          );
+          setGalleryImages(event.imageGallery);
+        }
+
+        // Initialize form data
+        const formDataInitial = {
+          title: event.title || "",
+          description: event.description || "",
+          location: event.location || "",
+          startDate: "",
+          startTime: "",
+          endDate: "",
+          endTime: "",
+          isPublished:
+            event.isPublished !== undefined ? event.isPublished : false,
+          includeStartTime: false,
+          includeEndTime: false,
+          imageGallery:
+            event.imageGallery && event.imageGallery.length > 0
+              ? event.imageGallery
+              : [],
+          sections:
+            event.sections && event.sections.length > 0
+              ? event.sections.map((section) => ({
+                  ...section,
+                  registrationOpenDate: section.registrationOpenDate
+                    ? new Date(section.registrationOpenDate)
+                        .toISOString()
+                        .split("T")[0]
+                    : "",
+                }))
+              : [],
+        };
+
+        // If dates exist, format them
+        if (event.startDate) {
+          const startDate = new Date(event.startDate);
+          formDataInitial.startDate = startDate.toISOString().split("T")[0];
+
+          // Check if time is midnight to determine if time was included
+          const startTimeStr = startDate.toTimeString().substring(0, 5);
+          formDataInitial.includeStartTime = startTimeStr !== "00:00";
+          if (formDataInitial.includeStartTime) {
+            formDataInitial.startTime = startTimeStr;
+          }
+        }
+
+        if (event.endDate) {
+          const endDate = new Date(event.endDate);
+          formDataInitial.endDate = endDate.toISOString().split("T")[0];
+
+          // Check if time is 23:59:59 to determine if time was included
+          const endTimeStr = endDate.toTimeString().substring(0, 5);
+          formDataInitial.includeEndTime = endTimeStr !== "23:59";
+          if (formDataInitial.includeEndTime) {
+            formDataInitial.endTime = endTimeStr;
+          }
+        }
+
+        setFormData(formDataInitial);
+      }
+    } catch (err) {
+      console.error("Failed to fetch event:", err);
+    }
+  };
+
+  // Function to handle image deletion
+  const handleDeleteImage = async (imageId) => {
+    if (!slug || !imageId) return;
+
+    try {
+      const response = await axios.delete(
+        `${API_BASE_URL}/events/${slug}/images/${imageId}`
+      );
+
+      console.log("Delete image response:", response.data);
+
+      if (response.data && response.data.success) {
+        // Remove the deleted image from the state
+        setGalleryImages((prevImages) =>
+          prevImages.filter((img) => img._id !== imageId)
+        );
+        return true;
+      }
+      throw new Error(response.data?.message || "Failed to delete image");
+    } catch (error) {
+      console.error("Failed to delete image:", error);
+      throw error;
+    }
+  };
+
+  // Function to handle newly uploaded image
+  const handleImageUploaded = (newImage) => {
+    console.log("New image uploaded:", newImage);
+    setGalleryImages((prevImages) => [...prevImages, newImage]);
+  };
 
   // Handle form field changes
   const handleChange = (e) => {
@@ -132,35 +202,13 @@ function EditEventPage() {
     }
   };
 
-  // Handle image gallery changes
-  const handleImageChange = (index, field, value) => {
-    const updatedGallery = [...formData.imageGallery];
-    updatedGallery[index] = { ...updatedGallery[index], [field]: value };
-    setFormData({ ...formData, imageGallery: updatedGallery });
-  };
-
-  // Add a new image to the gallery
-  const addImage = () => {
-    setFormData({
-      ...formData,
-      imageGallery: [...formData.imageGallery, { name: "", imageUrl: "" }],
-    });
-  };
-
-  // Remove an image from the gallery
-  const removeImage = (index) => {
-    const updatedGallery = formData.imageGallery.filter((_, i) => i !== index);
-    setFormData({ ...formData, imageGallery: updatedGallery });
-  };
-
-  // Handle section field changes
+  // Section management functions
   const handleSectionChange = (index, field, value) => {
     const updatedSections = [...formData.sections];
     updatedSections[index] = { ...updatedSections[index], [field]: value };
     setFormData({ ...formData, sections: updatedSections });
   };
 
-  // Add a new section
   const addSection = () => {
     setFormData({
       ...formData,
@@ -176,13 +224,12 @@ function EditEventPage() {
     });
   };
 
-  // Remove a section
   const removeSection = (index) => {
     const updatedSections = formData.sections.filter((_, i) => i !== index);
     setFormData({ ...formData, sections: updatedSections });
   };
 
-  // Add date validation function
+  // Form validation
   const validateDates = () => {
     // If both dates are empty, that's fine (no dates required)
     if (!formData.startDate && !formData.endDate) {
@@ -230,7 +277,7 @@ function EditEventPage() {
     return { valid: true };
   };
 
-  // Handle form submission
+  // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setValidationError(null);
@@ -251,7 +298,13 @@ function EditEventPage() {
       // Format the data for API
       const eventData = {
         ...formData,
+        imageGallery: galleryImages, // Use the galleryImages state instead of formData.imageGallery
       };
+
+      console.log(
+        "Submitting event with gallery images:",
+        galleryImages.length
+      );
 
       // Only add dates if they're provided
       if (formData.startDate) {
@@ -320,278 +373,368 @@ function EditEventPage() {
     }
   };
 
+  // Component for Basic Info section
+  const BasicInfoSection = () => (
+    <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+      <Typography variant="h6" gutterBottom>
+        Basic Information
+      </Typography>
+
+      <TextField
+        label="Event Title"
+        name="title"
+        value={formData.title}
+        onChange={handleChange}
+        fullWidth
+        required
+        margin="normal"
+      />
+
+      <TextField
+        label="Description"
+        name="description"
+        value={formData.description}
+        onChange={handleChange}
+        fullWidth
+        multiline
+        rows={4}
+        margin="normal"
+      />
+
+      <TextField
+        label="Location"
+        name="location"
+        value={formData.location}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      />
+
+      <FormGroup sx={{ mt: 2 }}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={formData.isPublished}
+              onChange={handleChange}
+              name="isPublished"
+              color="primary"
+            />
+          }
+          label="Publish Event"
+        />
+      </FormGroup>
+    </Paper>
+  );
+
+  // Component for Dates and Times section
+  const DatesAndTimesSection = () => (
+    <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+      <Typography variant="h6" gutterBottom>
+        Event Dates and Times
+      </Typography>
+
+      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+        <TextField
+          label="Start Date"
+          type="date"
+          name="startDate"
+          value={formData.startDate}
+          onChange={handleChange}
+          InputLabelProps={{ shrink: true }}
+          fullWidth
+        />
+
+        <Box sx={{ ml: 2 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.includeStartTime}
+                onChange={handleChange}
+                name="includeStartTime"
+                disabled={!formData.startDate}
+              />
+            }
+            label="Include start time"
+          />
+
+          {formData.includeStartTime && formData.startDate && (
+            <TextField
+              type="time"
+              name="startTime"
+              value={formData.startTime}
+              onChange={handleChange}
+              required={formData.includeStartTime}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              sx={{ mt: 1 }}
+            />
+          )}
+        </Box>
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <TextField
+          label="End Date"
+          type="date"
+          name="endDate"
+          value={formData.endDate}
+          onChange={handleChange}
+          InputLabelProps={{ shrink: true }}
+          fullWidth
+        />
+
+        <Box sx={{ ml: 2 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.includeEndTime}
+                onChange={handleChange}
+                name="includeEndTime"
+                disabled={!formData.endDate}
+              />
+            }
+            label="Include end time"
+          />
+
+          {formData.includeEndTime && formData.endDate && (
+            <TextField
+              type="time"
+              name="endTime"
+              value={formData.endTime}
+              onChange={handleChange}
+              required={formData.includeEndTime}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              sx={{ mt: 1 }}
+            />
+          )}
+        </Box>
+      </Box>
+    </Paper>
+  );
+
+  // Component for Image Gallery section
+  const EventImageGallerySection = () => (
+    <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+      <Typography variant="h6" gutterBottom>
+        Image Gallery
+      </Typography>
+
+      {/* Pass the slug to the image gallery component */}
+      <ImageGallery
+        eventSlug={slug}
+        images={galleryImages}
+        onDeleteImage={handleDeleteImage}
+        onImageUploaded={handleImageUploaded}
+      />
+
+      {/* Debug information - helpful for troubleshooting */}
+      <Box sx={{ mt: 2, p: 2, border: "1px dashed #ccc", borderRadius: 1 }}>
+        <Typography variant="caption" color="text.secondary">
+          Debug Info: {galleryImages.length} images loaded
+        </Typography>
+        {galleryImages.length > 0 && (
+          <Box
+            component="pre"
+            sx={{
+              fontSize: "0.7rem",
+              mt: 1,
+              p: 1,
+              bgcolor: "#f5f5f5",
+              maxHeight: "100px",
+              overflow: "auto",
+            }}
+          >
+            {JSON.stringify(galleryImages[0], null, 2)}
+          </Box>
+        )}
+
+        {galleryImages.length > 0 && (
+          <Box sx={{ mt: 2, p: 2, border: "1px dashed #ccc", borderRadius: 1 }}>
+            <Typography variant="subtitle2">Debug: Image URLs</Typography>
+            {galleryImages.map((img, idx) => (
+              <Box key={idx} sx={{ fontSize: "0.75rem" }}>
+                {idx + 1}. {img.imageUrl}
+              </Box>
+            ))}
+          </Box>
+        )}
+      </Box>
+    </Paper>
+  );
+
+  // Component for a single event section editor
+  const EventSectionItem = ({ section, index }) => (
+    <Paper
+      key={`section-${index}`}
+      variant="outlined"
+      sx={{ p: 2, mb: 2, position: "relative" }}
+    >
+      <IconButton
+        size="small"
+        color="error"
+        onClick={() => removeSection(index)}
+        sx={{ position: "absolute", top: 8, right: 8 }}
+      >
+        <DeleteIcon />
+      </IconButton>
+
+      <Typography variant="subtitle1" gutterBottom>
+        Section {index + 1}
+      </Typography>
+
+      <TextField
+        label="Section Title"
+        value={section.title}
+        onChange={(e) => handleSectionChange(index, "title", e.target.value)}
+        fullWidth
+        margin="normal"
+        size="small"
+      />
+
+      <TextField
+        label="Description"
+        value={section.description}
+        onChange={(e) =>
+          handleSectionChange(index, "description", e.target.value)
+        }
+        fullWidth
+        multiline
+        rows={3}
+        margin="normal"
+        size="small"
+      />
+
+      <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+        <TextField
+          label="Capacity"
+          type="number"
+          value={section.capacity}
+          onChange={(e) =>
+            handleSectionChange(index, "capacity", e.target.value)
+          }
+          placeholder="Leave blank for unlimited"
+          InputProps={{ inputProps: { min: 0 } }}
+          fullWidth
+          margin="normal"
+          size="small"
+        />
+
+        <TextField
+          label="Registration Open Date"
+          type="date"
+          value={section.registrationOpenDate}
+          onChange={(e) =>
+            handleSectionChange(index, "registrationOpenDate", e.target.value)
+          }
+          InputLabelProps={{ shrink: true }}
+          fullWidth
+          margin="normal"
+          size="small"
+        />
+      </Box>
+    </Paper>
+  );
+
+  // Component for Event Sections
+  const EventSectionsSection = () => (
+    <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <Typography variant="h6">Event Sections</Typography>
+        <Button
+          startIcon={<AddIcon />}
+          variant="outlined"
+          onClick={addSection}
+          size="small"
+        >
+          Add Section
+        </Button>
+      </Box>
+
+      {formData.sections.length === 0 ? (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ fontStyle: "italic", mb: 2 }}
+        >
+          No sections added yet.
+        </Typography>
+      ) : (
+        formData.sections.map((section, index) => (
+          <EventSectionItem key={index} section={section} index={index} />
+        ))
+      )}
+    </Paper>
+  );
+
+  // Form action buttons
+  const FormActionButtons = () => (
+    <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+      <Button
+        variant="outlined"
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate("/events")}
+      >
+        Cancel
+      </Button>
+
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        startIcon={
+          loading ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : (
+            <SaveIcon />
+          )
+        }
+        disabled={loading}
+      >
+        {loading ? "Saving..." : isEditMode ? "Update Event" : "Create Event"}
+      </Button>
+    </Box>
+  );
+
   return (
     <div className="edit-event-container">
-      <h1>{isEditMode ? "Edit Event" : "Create New Event"}</h1>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1">
+          {isEditMode ? "Edit Event" : "Create New Event"}
+        </Typography>
+      </Box>
 
       {successMessage && (
-        <div className="success-message">{successMessage}</div>
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {successMessage}
+        </Alert>
       )}
 
-      {error && <div className="error-alert">Error: {error}</div>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
       {validationError && (
-        <div className="error-alert">Error: {validationError}</div>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {validationError}
+        </Alert>
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="title">Event Title *</label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="location">Location</label>
-          <input
-            type="text"
-            id="location"
-            name="location"
-            value={formData.location}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="startDate">Start Date</label>
-            <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group time-group">
-            <div className="checkbox-container">
-              <input
-                type="checkbox"
-                id="includeStartTime"
-                name="includeStartTime"
-                checked={formData.includeStartTime}
-                onChange={handleChange}
-                disabled={!formData.startDate} // Disable if no date selected
-              />
-              <label htmlFor="includeStartTime">Include start time</label>
-            </div>
-
-            {formData.includeStartTime && formData.startDate && (
-              <input
-                type="time"
-                id="startTime"
-                name="startTime"
-                value={formData.startTime}
-                onChange={handleChange}
-                required={formData.includeStartTime}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="endDate">End Date</label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={formData.endDate}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group time-group">
-            <div className="checkbox-container">
-              <input
-                type="checkbox"
-                id="includeEndTime"
-                name="includeEndTime"
-                checked={formData.includeEndTime}
-                onChange={handleChange}
-                disabled={!formData.endDate} // Disable if no date selected
-              />
-              <label htmlFor="includeEndTime">Include end time</label>
-            </div>
-
-            {formData.includeEndTime && formData.endDate && (
-              <input
-                type="time"
-                id="endTime"
-                name="endTime"
-                value={formData.endTime}
-                onChange={handleChange}
-                required={formData.includeEndTime}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="form-group publish-checkbox">
-          <label className="checkbox-container">
-            <input
-              type="checkbox"
-              name="isPublished"
-              checked={formData.isPublished}
-              onChange={handleChange}
-            />
-            <span className="checkbox-label">Publish Event</span>
-          </label>
-        </div>
-
-        <h2>Image Gallery</h2>
-        {formData.imageGallery.length === 0 ? (
-          <p className="empty-section-message">No images added yet.</p>
-        ) : (
-          formData.imageGallery.map((image, index) => (
-            <div key={`image-${index}`} className="section-card">
-              <h3>Image {index + 1}</h3>
-              <button
-                type="button"
-                className="remove-section-btn"
-                onClick={() => removeImage(index)}
-              >
-                ×
-              </button>
-
-              <div className="form-group">
-                <label htmlFor={`image-name-${index}`}>Image Name</label>
-                <input
-                  type="text"
-                  id={`image-name-${index}`}
-                  value={image.name}
-                  onChange={(e) =>
-                    handleImageChange(index, "name", e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor={`image-url-${index}`}>Image URL</label>
-                <input
-                  type="text"
-                  id={`image-url-${index}`}
-                  value={image.imageUrl}
-                  onChange={(e) =>
-                    handleImageChange(index, "imageUrl", e.target.value)
-                  }
-                  placeholder="Use placeholder path like: /api/placeholder/800/400"
-                />
-              </div>
-            </div>
-          ))
-        )}
-
-        <button type="button" className="add-section-btn" onClick={addImage}>
-          Add Image
-        </button>
-
-        <h2>Event Sections</h2>
-        {formData.sections.length === 0 ? (
-          <p className="empty-section-message">No sections added yet.</p>
-        ) : (
-          formData.sections.map((section, index) => (
-            <div key={`section-${index}`} className="section-card">
-              <h3>Section {index + 1}</h3>
-              <button
-                type="button"
-                className="remove-section-btn"
-                onClick={() => removeSection(index)}
-              >
-                ×
-              </button>
-
-              <div className="form-group">
-                <label htmlFor={`section-title-${index}`}>Section Title</label>
-                <input
-                  type="text"
-                  id={`section-title-${index}`}
-                  value={section.title}
-                  onChange={(e) =>
-                    handleSectionChange(index, "title", e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor={`section-description-${index}`}>
-                  Description
-                </label>
-                <textarea
-                  id={`section-description-${index}`}
-                  value={section.description}
-                  onChange={(e) =>
-                    handleSectionChange(index, "description", e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor={`section-capacity-${index}`}>Capacity</label>
-                  <input
-                    type="number"
-                    id={`section-capacity-${index}`}
-                    value={section.capacity}
-                    onChange={(e) =>
-                      handleSectionChange(index, "capacity", e.target.value)
-                    }
-                    min="0"
-                    placeholder="Leave blank for unlimited"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor={`section-registration-${index}`}>
-                    Registration Open Date
-                  </label>
-                  <input
-                    type="date"
-                    id={`section-registration-${index}`}
-                    value={section.registrationOpenDate}
-                    onChange={(e) =>
-                      handleSectionChange(
-                        index,
-                        "registrationOpenDate",
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-
-        <button type="button" className="add-section-btn" onClick={addSection}>
-          Add Section
-        </button>
-
-        <div>
-          <button type="submit" className="submit-btn" disabled={loading}>
-            {loading
-              ? "Saving..."
-              : isEditMode
-              ? "Update Event"
-              : "Create Event"}
-          </button>
-        </div>
+        <BasicInfoSection />
+        <DatesAndTimesSection />
+        {isEditMode && <EventImageGallerySection />}
+        <EventSectionsSection />
+        <FormActionButtons />
       </form>
     </div>
   );

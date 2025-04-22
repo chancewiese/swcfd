@@ -2,7 +2,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useEvents from "../hooks/useEvents";
-import "./AddEventDialog.css";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Alert,
+  CircularProgress,
+  Box,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 
 function AddEventDialog({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -44,38 +56,58 @@ function AddEventDialog({ isOpen, onClose }) {
   };
 
   return (
-    <div className="dialog-overlay" onClick={onClose}>
-      <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Create New Event</h2>
+    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle sx={{ fontWeight: 500 }}>Create New Event</DialogTitle>
 
-        {submitError && <div className="error-message">{submitError}</div>}
-        {error && <div className="error-message">{error}</div>}
+      <DialogContent>
+        {submitError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {submitError}
+          </Alert>
+        )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="event-title">Event Title</label>
-            <input
-              type="text"
-              id="event-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter event title"
-              autoFocus
-              required
-            />
-          </div>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-          <div className="dialog-actions">
-            <button type="button" className="cancel-btn" onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? "Creating..." : "Create & Edit Details"}
-            </button>
-          </div>
+        <form id="add-event-form" onSubmit={handleSubmit}>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="event-title"
+            label="Event Title"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            sx={{ mt: 1 }}
+          />
+          <Box sx={{ mt: 1, color: "text.secondary", fontSize: "0.875rem" }}>
+            You'll be able to add more details after creating the event.
+          </Box>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onClose} variant="outlined" startIcon={<CloseIcon />}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          form="add-event-form"
+          variant="contained"
+          color="primary"
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={20} /> : <AddIcon />}
+        >
+          {loading ? "Creating..." : "Create & Edit Details"}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
