@@ -4,7 +4,9 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
-require("dotenv").config();
+require("dotenv").config({
+  path: path.resolve(__dirname, `.env.${process.env.NODE_ENV}`),
+});
 const mongoose = require("mongoose");
 
 // Import routes

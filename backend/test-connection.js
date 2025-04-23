@@ -1,5 +1,8 @@
 // backend/test-connection.js
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({
+  path: path.resolve(__dirname, `.env.${process.env.NODE_ENV}`),
+});
 const mongoose = require("mongoose");
 
 async function testConnection() {
