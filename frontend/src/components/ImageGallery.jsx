@@ -1,5 +1,9 @@
-// frontend/src/components/ImageGallery.jsx
-import { useState, useEffect } from "react";
+// src/components/ImageGallery.jsx
+import { useState } from "react";
+import { getImageUrl, handleImageError } from "../utils/imageUtils";
+import ImageUpload from "./ImageUpload";
+
+// Material UI imports
 import {
   Box,
   Card,
@@ -15,20 +19,10 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Grid,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ImageUpload from "./ImageUpload";
-
-// Get backend URL from environment variables
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
-
-// Helper function to ensure image URLs point to the backend
-const getFullImageUrl = (imageUrl) => {
-  if (!imageUrl) return "";
-  if (imageUrl.startsWith("http")) return imageUrl;
-  return `${BACKEND_URL}${imageUrl}`;
-};
 
 function ImageGallery({ eventSlug, images, onDeleteImage, onImageUploaded }) {
   const [viewImage, setViewImage] = useState(null);
@@ -72,24 +66,6 @@ function ImageGallery({ eventSlug, images, onDeleteImage, onImageUploaded }) {
     }
   };
 
-  // Debug image loading
-  useEffect(() => {
-    if (images && images.length > 0) {
-      const testUrl = images[0].imageUrl;
-      const fullUrl = getFullImageUrl(testUrl);
-      console.log("Testing image URL:", fullUrl);
-
-      // Try fetching the image directly to see if it works
-      fetch(fullUrl)
-        .then((res) => {
-          console.log("Image fetch response:", res.status, res.statusText);
-        })
-        .catch((err) => {
-          console.error("Image fetch error:", err);
-        });
-    }
-  }, [images]);
-
   return (
     <Box>
       {/* Image Upload Component */}
@@ -102,33 +78,19 @@ function ImageGallery({ eventSlug, images, onDeleteImage, onImageUploaded }) {
       )}
 
       {/* Image Gallery Grid */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
-          },
-          gap: 2,
-        }}
-      >
+      <Grid container spacing={2}>
         {images && images.length > 0 ? (
           images.map((image, index) => (
-            <Box key={image._id || index}>
+            <Grid item xs={12} sm={6} md={4} key={image._id || index}>
               <Card sx={{ height: "100%" }}>
                 <CardMedia
                   component="img"
                   height="180"
-                  image={getFullImageUrl(image.imageUrl)}
+                  image={getImageUrl(image.imageUrl)}
                   alt={image.name}
                   sx={{ objectFit: "cover", cursor: "pointer" }}
                   onClick={() => handleOpenImage(image)}
-                  onError={(e) => {
-                    console.error("Image failed to load:", image.imageUrl);
-                    // Optional fallback image
-                    // e.target.src = "/fallback-image.png";
-                  }}
+                  onError={handleImageError}
                 />
                 <CardContent sx={{ py: 1 }}>
                   <Typography variant="body2" noWrap>
@@ -153,20 +115,30 @@ function ImageGallery({ eventSlug, images, onDeleteImage, onImageUploaded }) {
                   </IconButton>
                 </CardActions>
               </Card>
-            </Box>
+            </Grid>
           ))
         ) : (
-          <Box sx={{ gridColumn: "1 / -1" }}>
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ fontStyle: "italic", textAlign: "center", p: 2 }}
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                textAlign: "center",
+                p: 4,
+                bgcolor: "#f5f5f5",
+                borderRadius: 2,
+                border: "1px dashed #ccc",
+              }}
             >
-              No images in gallery. Upload your first image above.
-            </Typography>
-          </Box>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ fontStyle: "italic" }}
+              >
+                No images in gallery. Upload your first image above.
+              </Typography>
+            </Box>
+          </Grid>
         )}
-      </Box>
+      </Grid>
 
       {/* Image Viewer Dialog */}
       <Dialog open={!!viewImage} onClose={handleCloseImage} maxWidth="md">
@@ -178,23 +150,22 @@ function ImageGallery({ eventSlug, images, onDeleteImage, onImageUploaded }) {
                 sx={{ position: "relative", width: "100%", maxHeight: "70vh" }}
               >
                 <img
-                  src={getFullImageUrl(viewImage.imageUrl)}
+                  src={getImageUrl(viewImage.imageUrl)}
                   alt={viewImage.name}
                   style={{
                     width: "100%",
                     maxHeight: "70vh",
                     objectFit: "contain",
                   }}
+                  onError={handleImageError}
                 />
-                {/* Debug information */}
+                {/* Image path for debugging */}
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ display: "block", mt: 1 }}
+                  sx={{ mt: 2, display: "block" }}
                 >
-                  Image URL: {viewImage.imageUrl}
-                  <br />
-                  Full URL: {getFullImageUrl(viewImage.imageUrl)}
+                  Image path: {viewImage.imageUrl}
                 </Typography>
               </Box>
             </DialogContent>

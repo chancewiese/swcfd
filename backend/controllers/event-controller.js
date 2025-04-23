@@ -219,8 +219,8 @@ exports.uploadEventImage = async (req, res, next) => {
     // Create image info object
     const imageName = req.body.name || "Event Image";
 
-    // Important: Use the correct URL format for the front end to access
-    // This should match how you're serving static files in app.js
+    // IMPORTANT: Store only the path relative to the images directory
+    // This makes the paths consistent and portable
     const imagePath = `/images/${req.file.filename}`;
 
     console.log("Creating image entry with path:", imagePath);

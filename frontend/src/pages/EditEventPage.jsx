@@ -529,7 +529,7 @@ function EditEventPage() {
       />
 
       {/* Debug information - helpful for troubleshooting */}
-      <Box sx={{ mt: 2, p: 2, border: "1px dashed #ccc", borderRadius: 1 }}>
+      {/* <Box sx{{ mt: 2, p: 2, border: "1px dashed #ccc", borderRadius: 1 }}>
         <Typography variant="caption" color="text.secondary">
           Debug Info: {galleryImages.length} images loaded
         </Typography>
@@ -559,7 +559,7 @@ function EditEventPage() {
             ))}
           </Box>
         )}
-      </Box>
+      </Box> */}
     </Paper>
   );
 

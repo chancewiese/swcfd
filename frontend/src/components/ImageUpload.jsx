@@ -1,5 +1,9 @@
-// frontend/src/components/ImageUpload.jsx
+// src/components/ImageUpload.jsx
 import { useState } from "react";
+import { generateEventImagePath } from "../utils/imageUtils";
+import axios from "axios";
+
+// Material UI imports
 import {
   Box,
   Button,
@@ -77,37 +81,35 @@ function ImageUpload({ eventSlug, onImageUploaded }) {
       const formData = new FormData();
       formData.append("image", file);
       formData.append("name", imageName);
-      formData.append("eventSlug", eventSlug); // Make sure eventSlug is included
+      formData.append("eventSlug", eventSlug);
 
-      // Use absolute URL to avoid path issues
+      // Use absolute URL
       const uploadUrl = `${API_BASE_URL}/events/${eventSlug}/images/upload`;
 
       console.log("Uploading to:", uploadUrl);
 
-      const response = await fetch(uploadUrl, {
-        method: "POST",
-        body: formData,
-        // No need to set Content-Type as FormData will set it automatically with boundaries
-        credentials: "include", // Send cookies for authentication if needed
+      const response = await axios.post(uploadUrl, formData, {
+        headers: {
+          // Let the browser set the content type for FormData
+          // This ensures proper boundary setting
+        },
+        withCredentials: true,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to upload image");
-      }
+      if (response.data && response.data.success) {
+        setSuccess("Image uploaded successfully");
+        setFile(null);
+        setPreviewUrl("");
+        setImageName("");
 
-      const data = await response.json();
+        console.log("Upload response:", response.data);
 
-      setSuccess("Image uploaded successfully");
-      setFile(null);
-      setPreviewUrl("");
-      setImageName("");
-
-      console.log("Upload response:", data);
-
-      // Notify parent component of the new image
-      if (onImageUploaded && data.data && data.data.image) {
-        onImageUploaded(data.data.image);
+        // Notify parent component of the new image
+        if (onImageUploaded && response.data.data && response.data.data.image) {
+          onImageUploaded(response.data.data.image);
+        }
+      } else {
+        throw new Error(response.data?.message || "Failed to upload image");
       }
     } catch (err) {
       console.error("Upload error:", err);

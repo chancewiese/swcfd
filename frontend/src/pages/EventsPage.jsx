@@ -4,6 +4,11 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import useEvents from "../hooks/useEvents";
 import AddEventDialog from "../components/AddEventDialog";
+import {
+  getImageUrl,
+  handleImageError,
+  getEventPrimaryImage,
+} from "../utils/imageUtils";
 
 // Material UI imports
 import {
@@ -16,7 +21,6 @@ import {
   Grid,
   Container,
   Box,
-  Chip,
   Divider,
   CircularProgress,
   Alert,
@@ -89,16 +93,14 @@ function EventsPage() {
       <CardMedia
         component="img"
         height="200"
-        image={
-          event.imageGallery && event.imageGallery.length > 0
-            ? event.imageGallery[0].imageUrl
-            : "/api/placeholder/300/200"
-        }
+        image={getEventPrimaryImage(event)}
         alt={
           event.imageGallery && event.imageGallery.length > 0
             ? event.imageGallery[0].name
             : event.title
         }
+        sx={{ objectFit: "cover" }}
+        onError={handleImageError}
       />
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography variant="h5" component="h2" gutterBottom>
@@ -134,7 +136,7 @@ function EventsPage() {
         </Typography>
       </CardContent>
 
-      <CardActions sx={{ p: 2 }}>
+      <CardActions sx={{ p: 2, mt: "auto" }}>
         <Button
           component={Link}
           to={`/events/${event.titleSlug}`}
@@ -218,7 +220,13 @@ function EventsPage() {
         ) : (
           <Grid container spacing={3}>
             {publishedEvents.map((event) => (
-              <Grid item xs={12} sm={6} md={4} key={event.titleSlug}>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                key={event.titleSlug || event._id}
+              >
                 <EventCard event={event} />
               </Grid>
             ))}
@@ -244,7 +252,13 @@ function EventsPage() {
         ) : (
           <Grid container spacing={3}>
             {unpublishedEvents.map((event) => (
-              <Grid item xs={12} sm={6} md={4} key={event.titleSlug}>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                key={event.titleSlug || event._id}
+              >
                 <EventCard event={event} />
               </Grid>
             ))}
