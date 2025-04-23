@@ -111,24 +111,82 @@ exports.updateEventBySlug = async (req, res, next) => {
       });
     }
 
-    const event = await Event.findOneAndUpdate({ titleSlug: slug }, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!event) {
+    // IMPORTANT: Handle sections correctly
+    // First, find the event to get its current state
+    const existingEvent = await Event.findOne({ titleSlug: slug });
+    if (!existingEvent) {
       return res.status(404).json({
         success: false,
         message: "Event not found",
       });
     }
 
+    // Create a copy of the request body for our updates
+    const updateData = { ...req.body };
+
+    // If sections are provided, we need to handle them differently
+    if (req.body.sections && Array.isArray(req.body.sections)) {
+      // Need to create/update each section individually
+      // Remove sections from the update data - we'll handle them separately
+      delete updateData.sections;
+
+      // Process each section
+      const sectionIds = [];
+
+      for (const sectionData of req.body.sections) {
+        // If the section has an _id, update it
+        if (sectionData._id) {
+          await EventSection.findByIdAndUpdate(
+            sectionData._id,
+            {
+              title: sectionData.title,
+              description: sectionData.description,
+              capacity: sectionData.capacity,
+              registrationOpenDate: sectionData.registrationOpenDate,
+              // Make sure slug is set too
+              slug: slugify(sectionData.title, { lower: true, trim: true }),
+            },
+            { new: true }
+          );
+
+          sectionIds.push(sectionData._id);
+        }
+        // Otherwise create a new section
+        else {
+          // Ensure the section has a slug
+          if (!sectionData.slug && sectionData.title) {
+            sectionData.slug = slugify(sectionData.title, {
+              lower: true,
+              trim: true,
+            });
+          }
+
+          const newSection = new EventSection(sectionData);
+          await newSection.save();
+          sectionIds.push(newSection._id);
+        }
+      }
+
+      // Now update the event with the section IDs
+      updateData.sections = sectionIds;
+    }
+
+    // Now update the event with our modified updateData
+    const event = await Event.findOneAndUpdate(
+      { titleSlug: slug },
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
     res.status(200).json({
       success: true,
       data: event,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error updating event:", err);
     res.status(500).json({
       success: false,
       message: err.message,

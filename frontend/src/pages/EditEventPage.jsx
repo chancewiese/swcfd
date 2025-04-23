@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useEvents from "../hooks/useEvents";
 import ImageGallery from "../components/ImageGallery";
+import EditEventSectionDialog from "../components/EditEventSectionDialog";
 import axios from "axios";
 import "./styles/EditEventPage.css";
 
@@ -21,11 +22,16 @@ import {
   Divider,
   Switch,
   CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditIcon from "@mui/icons-material/Edit";
 
 // Get API URL from environment variables
 const API_BASE_URL =
@@ -57,11 +63,15 @@ function EditEventPage() {
     sections: [],
   });
 
+  // Section dialog state
+  const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
+  const [currentSection, setCurrentSection] = useState(null);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(-1);
+
   // Fetch event data when component loads in edit mode
   useEffect(() => {
     if (isEditMode) {
       fetchEventData();
-      // Removed the separate fetchEventImages call since images are included in event data
     }
   }, [slug, getEvent, isEditMode]);
 
@@ -74,7 +84,7 @@ function EditEventPage() {
       if (event) {
         setEventId(event._id);
 
-        // IMPORTANT: Set gallery images from the event data
+        // Set gallery images from the event data
         if (event.imageGallery && event.imageGallery.length > 0) {
           console.log(
             "Setting gallery images from event data:",
@@ -203,30 +213,42 @@ function EditEventPage() {
   };
 
   // Section management functions
-  const handleSectionChange = (index, field, value) => {
-    const updatedSections = [...formData.sections];
-    updatedSections[index] = { ...updatedSections[index], [field]: value };
-    setFormData({ ...formData, sections: updatedSections });
+  const handleOpenAddSectionDialog = () => {
+    setCurrentSection(null);
+    setCurrentSectionIndex(-1);
+    setSectionDialogOpen(true);
   };
 
-  const addSection = () => {
+  const handleOpenEditSectionDialog = (index) => {
+    setCurrentSection(formData.sections[index]);
+    setCurrentSectionIndex(index);
+    setSectionDialogOpen(true);
+  };
+
+  const handleSaveSection = (sectionData) => {
+    if (currentSectionIndex === -1) {
+      // Add new section
+      setFormData({
+        ...formData,
+        sections: [...formData.sections, sectionData],
+      });
+    } else {
+      // Update existing section
+      const updatedSections = [...formData.sections];
+      updatedSections[currentSectionIndex] = sectionData;
+      setFormData({
+        ...formData,
+        sections: updatedSections,
+      });
+    }
+  };
+
+  const handleDeleteSection = (index) => {
+    const updatedSections = formData.sections.filter((_, i) => i !== index);
     setFormData({
       ...formData,
-      sections: [
-        ...formData.sections,
-        {
-          title: "",
-          description: "",
-          capacity: "",
-          registrationOpenDate: "",
-        },
-      ],
+      sections: updatedSections,
     });
-  };
-
-  const removeSection = (index) => {
-    const updatedSections = formData.sections.filter((_, i) => i !== index);
-    setFormData({ ...formData, sections: updatedSections });
   };
 
   // Form validation
@@ -331,9 +353,11 @@ function EditEventPage() {
         eventData.endDate = null;
       }
 
-      // Format sections
+      // Format sections - IMPORTANT: preserve the _id field if it exists
       eventData.sections = formData.sections.map((section) => ({
-        ...section,
+        ...(section._id ? { _id: section._id } : {}), // Only include _id if it exists
+        title: section.title || "",
+        description: section.description || "",
         capacity: section.capacity ? Number(section.capacity) : null,
         registrationOpenDate: section.registrationOpenDate
           ? new Date(section.registrationOpenDate).toISOString()
@@ -527,112 +551,6 @@ function EditEventPage() {
         onDeleteImage={handleDeleteImage}
         onImageUploaded={handleImageUploaded}
       />
-
-      {/* Debug information - helpful for troubleshooting */}
-      {/* <Box sx{{ mt: 2, p: 2, border: "1px dashed #ccc", borderRadius: 1 }}>
-        <Typography variant="caption" color="text.secondary">
-          Debug Info: {galleryImages.length} images loaded
-        </Typography>
-        {galleryImages.length > 0 && (
-          <Box
-            component="pre"
-            sx={{
-              fontSize: "0.7rem",
-              mt: 1,
-              p: 1,
-              bgcolor: "#f5f5f5",
-              maxHeight: "100px",
-              overflow: "auto",
-            }}
-          >
-            {JSON.stringify(galleryImages[0], null, 2)}
-          </Box>
-        )}
-
-        {galleryImages.length > 0 && (
-          <Box sx={{ mt: 2, p: 2, border: "1px dashed #ccc", borderRadius: 1 }}>
-            <Typography variant="subtitle2">Debug: Image URLs</Typography>
-            {galleryImages.map((img, idx) => (
-              <Box key={idx} sx={{ fontSize: "0.75rem" }}>
-                {idx + 1}. {img.imageUrl}
-              </Box>
-            ))}
-          </Box>
-        )}
-      </Box> */}
-    </Paper>
-  );
-
-  // Component for a single event section editor
-  const EventSectionItem = ({ section, index }) => (
-    <Paper
-      key={`section-${index}`}
-      variant="outlined"
-      sx={{ p: 2, mb: 2, position: "relative" }}
-    >
-      <IconButton
-        size="small"
-        color="error"
-        onClick={() => removeSection(index)}
-        sx={{ position: "absolute", top: 8, right: 8 }}
-      >
-        <DeleteIcon />
-      </IconButton>
-
-      <Typography variant="subtitle1" gutterBottom>
-        Section {index + 1}
-      </Typography>
-
-      <TextField
-        label="Section Title"
-        value={section.title}
-        onChange={(e) => handleSectionChange(index, "title", e.target.value)}
-        fullWidth
-        margin="normal"
-        size="small"
-      />
-
-      <TextField
-        label="Description"
-        value={section.description}
-        onChange={(e) =>
-          handleSectionChange(index, "description", e.target.value)
-        }
-        fullWidth
-        multiline
-        rows={3}
-        margin="normal"
-        size="small"
-      />
-
-      <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
-        <TextField
-          label="Capacity"
-          type="number"
-          value={section.capacity}
-          onChange={(e) =>
-            handleSectionChange(index, "capacity", e.target.value)
-          }
-          placeholder="Leave blank for unlimited"
-          InputProps={{ inputProps: { min: 0 } }}
-          fullWidth
-          margin="normal"
-          size="small"
-        />
-
-        <TextField
-          label="Registration Open Date"
-          type="date"
-          value={section.registrationOpenDate}
-          onChange={(e) =>
-            handleSectionChange(index, "registrationOpenDate", e.target.value)
-          }
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-          margin="normal"
-          size="small"
-        />
-      </Box>
     </Paper>
   );
 
@@ -651,7 +569,7 @@ function EditEventPage() {
         <Button
           startIcon={<AddIcon />}
           variant="outlined"
-          onClick={addSection}
+          onClick={handleOpenAddSectionDialog}
           size="small"
         >
           Add Section
@@ -667,9 +585,76 @@ function EditEventPage() {
           No sections added yet.
         </Typography>
       ) : (
-        formData.sections.map((section, index) => (
-          <EventSectionItem key={index} section={section} index={index} />
-        ))
+        <List>
+          {formData.sections.map((section, index) => (
+            <ListItem
+              key={index}
+              sx={{
+                mb: 1,
+                border: "1px solid #eee",
+                borderRadius: 1,
+                bgcolor: "#f9f9f9",
+              }}
+            >
+              <ListItemText
+                primary={section.title || "Untitled Section"}
+                secondary={
+                  <>
+                    <Typography
+                      variant="body2"
+                      component="span"
+                      color="text.secondary"
+                      noWrap
+                    >
+                      {section.description
+                        ? section.description.length > 60
+                          ? `${section.description.substring(0, 60)}...`
+                          : section.description
+                        : "No description"}
+                    </Typography>
+                    <br />
+                    {section.capacity && (
+                      <Typography
+                        variant="body2"
+                        component="span"
+                        color="text.secondary"
+                      >
+                        Capacity: {section.capacity}
+                      </Typography>
+                    )}
+                    {section.registrationOpenDate && (
+                      <Typography
+                        variant="body2"
+                        component="span"
+                        color="text.secondary"
+                        sx={{ ml: 2 }}
+                      >
+                        Opens: {section.registrationOpenDate}
+                      </Typography>
+                    )}
+                  </>
+                }
+              />
+              <ListItemSecondaryAction>
+                <IconButton
+                  edge="end"
+                  aria-label="edit"
+                  onClick={() => handleOpenEditSectionDialog(index)}
+                >
+                  <EditIcon />
+                </IconButton>
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={() => handleDeleteSection(index)}
+                  sx={{ ml: 1 }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))}
+        </List>
       )}
     </Paper>
   );
@@ -736,6 +721,15 @@ function EditEventPage() {
         <EventSectionsSection />
         <FormActionButtons />
       </form>
+
+      {/* Section Dialog */}
+      <EditEventSectionDialog
+        isOpen={sectionDialogOpen}
+        onClose={() => setSectionDialogOpen(false)}
+        onSave={handleSaveSection}
+        section={currentSection}
+        isNew={currentSectionIndex === -1}
+      />
     </div>
   );
 }
