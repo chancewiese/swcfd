@@ -7,17 +7,13 @@ import HomePage from "./pages/HomePage";
 import EventsPage from "./pages/EventsPage";
 import EventPage from "./pages/EventPage";
 import EditEventPage from "./pages/EditEventPage";
+import AccountPage from "./pages/AccountPage";
 
 // Import auth pages
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-
-// Import user pages
-// import ProfilePage from "./pages/ProfilePage";
-import FamilyPage from "./pages/FamilyPage";
-// import DashboardPage from "./pages/DashboardPage";
 
 // Import auth middleware
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -119,7 +115,7 @@ const Router = () => {
         path="/login"
         element={
           isAuthenticated ? (
-            <Navigate to="/dashboard" replace state={{ from: location }} />
+            <Navigate to="/account" replace state={{ from: location }} />
           ) : (
             <Layout>
               <LoginPage />
@@ -131,7 +127,7 @@ const Router = () => {
         path="/register"
         element={
           isAuthenticated ? (
-            <Navigate to="/dashboard" replace state={{ from: location }} />
+            <Navigate to="/account" replace state={{ from: location }} />
           ) : (
             <Layout>
               <RegisterPage />
@@ -157,32 +153,12 @@ const Router = () => {
       />
 
       {/* Protected Routes */}
-      {/* <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <DashboardPage />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
       <Route
-        path="/profile"
+        path="/account"
         element={
           <ProtectedRoute>
             <Layout>
-              <ProfilePage />
-            </Layout>
-          </ProtectedRoute>
-        }
-      /> */}
-      <Route
-        path="/family"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <FamilyPage />
+              <AccountPage />
             </Layout>
           </ProtectedRoute>
         }

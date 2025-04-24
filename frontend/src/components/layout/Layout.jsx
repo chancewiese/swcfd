@@ -36,8 +36,6 @@ function Layout({ children }) {
         isOpen={sidebarOpen}
         closeSidebar={closeSidebar}
         isAuthenticated={isAuthenticated}
-        user={user}
-        onLogout={handleLogout}
       />
       <main className="main-content">{children}</main>
       <Footer />
