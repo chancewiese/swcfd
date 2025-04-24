@@ -120,7 +120,15 @@ exports.updateMyFamily = async (req, res, next) => {
 // @access  Private/FamilyManager
 exports.addFamilyMember = async (req, res, next) => {
   try {
-    const { firstName, lastName, dateOfBirth, gender } = req.body;
+    const {
+      firstName,
+      lastName,
+      dateOfBirth,
+      gender,
+      phoneNumber,
+      email,
+      address,
+    } = req.body;
 
     // Validate required fields
     if (!firstName || !lastName) {
@@ -140,14 +148,37 @@ exports.addFamilyMember = async (req, res, next) => {
       });
     }
 
-    // Create new family member
+    // Find the family to get manager info - we'll use this for defaults if needed
+    const family = await Family.findById(user.family).populate({
+      path: "manager",
+      select: "firstName lastName email phoneNumber address",
+    });
+
+    if (!family) {
+      return res.status(404).json({
+        success: false,
+        message: "Family not found",
+      });
+    }
+
+    // Create new family member with provided info
     const familyMember = new FamilyMember({
       firstName,
       lastName,
       dateOfBirth,
       gender,
+      email,
       family: user.family,
     });
+
+    // For phone and address, use provided values or inherit from family manager
+    if (phoneNumber) {
+      familyMember.phoneNumber = phoneNumber;
+    }
+
+    if (address && address.street) {
+      familyMember.address = address;
+    }
 
     await familyMember.save();
 
@@ -176,7 +207,15 @@ exports.addFamilyMember = async (req, res, next) => {
 // @access  Private/FamilyManager
 exports.updateFamilyMember = async (req, res, next) => {
   try {
-    const { firstName, lastName, dateOfBirth, gender } = req.body;
+    const {
+      firstName,
+      lastName,
+      dateOfBirth,
+      gender,
+      phoneNumber,
+      email,
+      address,
+    } = req.body;
     const memberId = req.params.memberId;
 
     // Get the user's family
@@ -207,6 +246,17 @@ exports.updateFamilyMember = async (req, res, next) => {
     if (lastName) familyMember.lastName = lastName;
     if (dateOfBirth) familyMember.dateOfBirth = dateOfBirth;
     if (gender) familyMember.gender = gender;
+    if (email) familyMember.email = email;
+
+    // Only update phone if provided (empty string means intentionally clearing)
+    if (phoneNumber !== undefined) {
+      familyMember.phoneNumber = phoneNumber;
+    }
+
+    // Only update address if provided (empty object or street means intentionally clearing)
+    if (address !== undefined) {
+      familyMember.address = address;
+    }
 
     await familyMember.save();
 
@@ -218,6 +268,9 @@ exports.updateFamilyMember = async (req, res, next) => {
         if (lastName) memberUser.lastName = lastName;
         if (dateOfBirth) memberUser.dateOfBirth = dateOfBirth;
         if (gender) memberUser.gender = gender;
+        if (email) memberUser.email = email;
+        if (phoneNumber !== undefined) memberUser.phoneNumber = phoneNumber;
+        if (address !== undefined) memberUser.address = address;
         await memberUser.save();
       }
     }

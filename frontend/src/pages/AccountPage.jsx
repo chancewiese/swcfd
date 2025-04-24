@@ -124,6 +124,36 @@ const AccountPage = () => {
     }
   };
 
+  const getManagerInfo = () => {
+    // If current user is the manager, use their info
+    if (user?.id === familyData?.manager) {
+      return {
+        phoneNumber: profileData.phoneNumber || "",
+        address: profileData.address || {},
+      };
+    }
+
+    // If another user is the manager, try to find their info
+    if (familyData?.members) {
+      const managerMember = familyData.members.find(
+        (member) => member.user === familyData.manager
+      );
+
+      if (managerMember) {
+        return {
+          phoneNumber: managerMember.phoneNumber || "",
+          address: managerMember.address || {},
+        };
+      }
+    }
+
+    // Default empty object if manager info not found
+    return {
+      phoneNumber: "",
+      address: {},
+    };
+  };
+
   // Handle family name update
   const handleFamilyNameUpdate = async () => {
     if (!familyName.trim()) {
@@ -583,8 +613,7 @@ const AccountPage = () => {
         }
         isLoading={familyActionLoading}
         isNewMember={isAddingMember}
-        defaultPhone={profileData.phoneNumber || ""}
-        defaultAddress={profileData.address || {}}
+        managerInfo={getManagerInfo()}
       />
 
       {/* Profile Dialog */}
