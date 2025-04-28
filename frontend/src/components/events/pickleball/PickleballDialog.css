@@ -73,7 +73,7 @@
 
 .form-group textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: 100px;
 }
 
 .form-group input:focus,
@@ -84,21 +84,49 @@
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
 }
 
-.checkbox-group {
-  display: flex;
-  align-items: center;
+.help-text,
+.input-help-text {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+/* Publish toggle button styling */
+.publish-toggle {
+  margin-bottom: 2rem;
+}
+
+.publish-toggle-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.3s;
+  width: 100%;
+  text-align: center;
 }
 
-.checkbox-label input {
-  width: auto;
-  margin: 0;
+.publish-toggle-button.published {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #2e7d32;
+}
+
+.publish-toggle-button.unpublished {
+  background-color: #fff3e0;
+  color: #e65100;
+  border: 1px solid #e65100;
+}
+
+.publish-toggle-button:hover.published {
+  background-color: #c8e6c9;
+}
+
+.publish-toggle-button:hover.unpublished {
+  background-color: #ffe0b2;
 }
 
 .dialog-actions {
@@ -145,6 +173,14 @@
 
 .delete-btn:hover {
   background-color: #d32f2f;
+}
+
+.delete-btn:disabled,
+.cancel-btn:disabled,
+.submit-btn:disabled,
+.publish-toggle-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Responsive adjustments */

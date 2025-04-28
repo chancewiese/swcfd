@@ -10,13 +10,24 @@ import "./styles/PickleballPage.css";
 
 const PickleballPage = () => {
   const { isAuthenticated, hasRole } = useAuth();
-  const { getEvent, updateEvent, loading, error } = useEvents();
+  const {
+    getEvent,
+    updateEvent,
+    addEventSection,
+    updateEventSection,
+    deleteEventSection,
+    loading,
+    error,
+  } = useEvents();
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSectionDialogOpen, setIsSectionDialogOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(-1);
   const [isAdmin, setIsAdmin] = useState(false);
   const [eventData, setEventData] = useState(null);
-  const [pickleballSections, setPickleballSections] = useState([]);
+  const [mainImageIndex, setMainImageIndex] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Check if user is admin
   useEffect(() => {
@@ -33,13 +44,6 @@ const PickleballPage = () => {
         const response = await getEvent("pickleball-tournament");
         if (response && response.data) {
           setEventData(response.data);
-
-          // Initialize sections from event data or with empty array
-          if (response.data.sections && Array.isArray(response.data.sections)) {
-            setPickleballSections(response.data.sections);
-          } else {
-            setPickleballSections([]);
-          }
         }
       } catch (err) {
         console.error("Failed to fetch pickleball event data:", err);
@@ -54,105 +58,136 @@ const PickleballPage = () => {
   };
 
   const handleSaveEvent = async (data) => {
-    // In a real implementation, you would save this to the server
-    const updatedEventData = {
-      ...eventData,
-      ...data,
-      pricePerTeam: data.pricePerTeam, // Add the new field
-    };
+    setIsSaving(true);
 
-    setEventData(updatedEventData);
-    setIsEditDialogOpen(false);
-
-    // Uncomment this to save changes to the server
-    /*
     try {
-      await updateEvent(eventData.titleSlug, updatedEventData);
+      // Format the data properly for the API
+      const updatedEventData = {
+        ...eventData,
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        isPublished: data.isPublished,
+        pricePerTeam: data.pricePerTeam, // Custom field for pickleball
+      };
+
+      // Save to the database through the API
+      const response = await updateEvent(eventData.titleSlug, updatedEventData);
+
+      if (response && response.data) {
+        setEventData(response.data);
+      }
+
+      setIsEditDialogOpen(false);
     } catch (err) {
       console.error("Failed to save event changes:", err);
+    } finally {
+      setIsSaving(false);
     }
-    */
   };
 
   const handleAddSection = () => {
     setCurrentSection(null);
+    setCurrentSectionIndex(-1);
     setIsSectionDialogOpen(true);
   };
 
-  const handleEditSection = (section) => {
+  const handleEditSection = (section, index) => {
     setCurrentSection(section);
+    setCurrentSectionIndex(index);
     setIsSectionDialogOpen(true);
   };
 
   const handleSaveSection = async (sectionData) => {
-    let updatedSections;
+    setIsSaving(true);
 
-    if (!currentSection) {
-      // Adding a new section
-      updatedSections = [...pickleballSections, sectionData];
-    } else {
-      // Updating existing section
-      updatedSections = pickleballSections.map((section) =>
-        section.id === sectionData.id ? sectionData : section
-      );
-    }
+    try {
+      // Format the section data properly for the API
+      const formattedSection = {
+        title: sectionData.title,
+        description: sectionData.description || "",
+        capacity: sectionData.maxTeams ? parseInt(sectionData.maxTeams) : null,
+        registrationOpenDate: sectionData.registrationOpenDate,
+        tournamentDate: sectionData.tournamentDate, // Custom field
+        tournamentTime: sectionData.tournamentTime, // Custom field
+        price: sectionData.price ? parseFloat(sectionData.price) : null, // Add price field
+      };
 
-    setPickleballSections(updatedSections);
-    setIsSectionDialogOpen(false);
+      let response;
 
-    // Update the server (in a real implementation)
-    if (eventData) {
-      try {
-        const updatedEventData = {
-          ...eventData,
-          sections: updatedSections,
-        };
-
-        // Uncomment this to save changes to the server
-        // await updateEvent(eventData.titleSlug, updatedEventData);
-
-        setEventData(updatedEventData);
-      } catch (err) {
-        console.error("Failed to save section changes:", err);
+      if (currentSectionIndex === -1) {
+        // Add new section
+        response = await addEventSection(eventData.titleSlug, formattedSection);
+      } else {
+        // Update existing section
+        const sectionId = eventData.sections[currentSectionIndex]._id;
+        response = await updateEventSection(
+          eventData.titleSlug,
+          sectionId,
+          formattedSection
+        );
       }
+
+      // Refetch the event data to get updated sections
+      const updatedEvent = await getEvent(eventData.titleSlug);
+      if (updatedEvent && updatedEvent.data) {
+        setEventData(updatedEvent.data);
+      }
+
+      setIsSectionDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to save section:", err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDeleteSection = async (sectionId) => {
-    const updatedSections = pickleballSections.filter(
-      (section) => section.id !== sectionId
-    );
-
-    setPickleballSections(updatedSections);
-    setIsSectionDialogOpen(false);
-
-    // Update the server (in a real implementation)
-    if (eventData) {
-      try {
-        const updatedEventData = {
-          ...eventData,
-          sections: updatedSections,
-        };
-
-        // Uncomment this to save changes to the server
-        // await updateEvent(eventData.titleSlug, updatedEventData);
-
-        setEventData(updatedEventData);
-      } catch (err) {
-        console.error("Failed to delete section:", err);
-      }
+    if (!window.confirm("Are you sure you want to delete this section?")) {
+      return;
     }
+
+    setIsSaving(true);
+
+    try {
+      // Delete the section through the API
+      await deleteEventSection(eventData.titleSlug, sectionId);
+
+      // Refetch the event data to get updated sections
+      const updatedEvent = await getEvent(eventData.titleSlug);
+      if (updatedEvent && updatedEvent.data) {
+        setEventData(updatedEvent.data);
+      }
+
+      setIsSectionDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to delete section:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle image gallery navigation
+  const handleThumbnailClick = (index) => {
+    setMainImageIndex(index);
   };
 
   // Helper function to format date and time
   const formatDateTime = (dateStr, timeStr) => {
     if (!dateStr) return "Date TBD";
 
+    // Fix the date issue by handling timezone offset
     const date = new Date(dateStr);
-    const formattedDate = date.toLocaleDateString("en-US", {
+    const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+    const correctedDate = new Date(date.getTime() + userTimezoneOffset);
+
+    const formattedDate = correctedDate.toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
+      year: "numeric",
     });
 
     if (!timeStr) return formattedDate;
@@ -216,8 +251,13 @@ const PickleballPage = () => {
             <div className="meta-item">
               <span className="meta-label">Date:</span>
               <span>
-                {new Date(eventData.startDate).toLocaleDateString()} -
-                {new Date(eventData.endDate).toLocaleDateString()}
+                {eventData.startDate && eventData.endDate
+                  ? `${formatDateTime(eventData.startDate, null)
+                      .split(", ")
+                      .slice(0, -1)
+                      .join(", ")} - 
+                   ${formatDateTime(eventData.endDate, null)}`
+                  : "Dates TBD"}
               </span>
             </div>
 
@@ -230,6 +270,12 @@ const PickleballPage = () => {
               <span className="meta-label">Registration Fee:</span>
               <span>{eventData.pricePerTeam || "$25 per team"}</span>
             </div>
+
+            {!eventData.isPublished && (
+              <div className="meta-item">
+                <span className="status-badge unpublished">Unpublished</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -265,7 +311,7 @@ const PickleballPage = () => {
             )}
           </div>
 
-          {pickleballSections.length === 0 ? (
+          {!eventData.sections || eventData.sections.length === 0 ? (
             <div className="no-sections-message">
               {isAdmin
                 ? "No divisions have been added yet. Click 'Add Division' to create tournament divisions."
@@ -273,15 +319,15 @@ const PickleballPage = () => {
             </div>
           ) : (
             <div className="sections-list">
-              {pickleballSections.map((section) => (
-                <div className="section-card" key={section.id}>
+              {eventData.sections.map((section, index) => (
+                <div className="section-card" key={section._id || index}>
                   <div className="section-header">
                     <h3>{section.title}</h3>
 
                     {isAdmin && (
                       <button
                         className="edit-section-button"
-                        onClick={() => handleEditSection(section)}
+                        onClick={() => handleEditSection(section, index)}
                       >
                         Edit
                       </button>
@@ -291,10 +337,17 @@ const PickleballPage = () => {
                   <div className="section-details">
                     <div className="section-info">
                       <div className="info-item">
+                        <span className="info-label">Description:</span>
+                        <span>
+                          {section.description || "No description provided"}
+                        </span>
+                      </div>
+
+                      <div className="info-item">
                         <span className="info-label">Tournament Date:</span>
                         <span>
                           {formatDateTime(
-                            section.tournamentDate,
+                            section.tournamentDate || section.startDate,
                             section.tournamentTime
                           )}
                         </span>
@@ -306,17 +359,25 @@ const PickleballPage = () => {
                             Registration Opens:
                           </span>
                           <span>
-                            {new Date(
-                              section.registrationOpenDate
-                            ).toLocaleDateString()}
+                            {formatDateTime(section.registrationOpenDate, null)}
                           </span>
                         </div>
                       )}
 
                       <div className="info-item">
                         <span className="info-label">Teams:</span>
-                        <span>0 / {section.maxTeams || "Unlimited"}</span>
+                        <span>
+                          0 /{" "}
+                          {section.capacity || section.maxTeams || "Unlimited"}
+                        </span>
                       </div>
+
+                      {section.price && (
+                        <div className="info-item">
+                          <span className="info-label">Price:</span>
+                          <span>${section.price}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="section-action">
@@ -334,21 +395,44 @@ const PickleballPage = () => {
           )}
         </div>
 
-        {/* Event Image */}
-        <div className="pickleball-image">
-          <h2>Event Gallery</h2>
-          <div className="image-container">
-            <img
-              src={
-                eventData.imageGallery && eventData.imageGallery.length > 0
-                  ? getImageUrl(eventData.imageGallery[0].imageUrl)
-                  : "/images/placeholder-event.jpg"
-              }
-              alt={eventData.title}
-              onError={handleImageError}
-            />
+        {/* Image Gallery */}
+        {eventData.imageGallery && eventData.imageGallery.length > 0 && (
+          <div className="pickleball-gallery">
+            <h2>Event Gallery</h2>
+            <div className="gallery-container">
+              <div className="main-image-container">
+                <img
+                  src={getImageUrl(
+                    eventData.imageGallery[mainImageIndex].imageUrl
+                  )}
+                  alt={eventData.imageGallery[mainImageIndex].name}
+                  className="main-gallery-image"
+                  onError={handleImageError}
+                />
+              </div>
+
+              {eventData.imageGallery.length > 1 && (
+                <div className="image-thumbnails">
+                  {eventData.imageGallery.map((image, index) => (
+                    <div
+                      key={image._id || index}
+                      className={`thumbnail ${
+                        index === mainImageIndex ? "active" : ""
+                      }`}
+                      onClick={() => handleThumbnailClick(index)}
+                    >
+                      <img
+                        src={getImageUrl(image.imageUrl)}
+                        alt={image.name}
+                        onError={handleImageError}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Back Button */}
@@ -365,6 +449,7 @@ const PickleballPage = () => {
           onClose={() => setIsEditDialogOpen(false)}
           eventData={eventData}
           onSave={handleSaveEvent}
+          isSaving={isSaving}
         />
       )}
 
@@ -375,6 +460,7 @@ const PickleballPage = () => {
           section={currentSection}
           onSave={handleSaveSection}
           onDelete={handleDeleteSection}
+          isSaving={isSaving}
         />
       )}
     </div>

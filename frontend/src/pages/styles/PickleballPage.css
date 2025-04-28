@@ -5,6 +5,30 @@
   padding: 2rem 1rem;
 }
 
+/* Success message */
+.success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #2e7d32;
+  text-align: center;
+  animation: fadeOut 5s forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 /* Loading and Error States */
 .loading-container,
 .error-container {
@@ -68,18 +92,55 @@
   color: #555;
 }
 
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.status-badge.published {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.unpublished {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
 .admin-actions {
-  margin-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.toggle-publish-button {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.toggle-publish-button:hover {
+  background-color: #e0e0e0;
 }
 
 .edit-tournament-button {
   background-color: #f57c00;
   color: white;
   border: none;
-  padding: 0.75rem 1.25rem;
+  padding: 0.6rem 1rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: background-color 0.3s;
 }
 
@@ -89,6 +150,10 @@
 
 /* Main Content */
 .pickleball-content {
+  margin-bottom: 2rem;
+}
+
+.tournament-image-slider {
   margin-bottom: 2rem;
 }
 
@@ -140,7 +205,7 @@
   font-style: italic;
 }
 
-.sections-list {
+.sections-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;

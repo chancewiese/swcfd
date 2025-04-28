@@ -8,11 +8,14 @@ const PickleballSectionDialog = ({
   section,
   onSave,
   onDelete,
+  isSaving,
 }) => {
   const [formData, setFormData] = useState({
-    id: "",
+    _id: "",
     title: "",
+    description: "",
     maxTeams: "",
+    price: "",
     registrationOpenDate: "",
     tournamentDate: "",
     tournamentTime: "",
@@ -23,20 +26,33 @@ const PickleballSectionDialog = ({
   // Initialize form data when section changes
   useEffect(() => {
     if (section) {
+      // Format dates for input fields and handle timezone offset
+      const formatDate = (dateString) => {
+        if (!dateString) return "";
+
+        // Create a date object and adjust for timezone offset
+        const date = new Date(dateString);
+        return date.toISOString().split("T")[0];
+      };
+
       setFormData({
-        id: section.id || Date.now().toString(),
+        _id: section._id || "",
         title: section.title || "",
-        maxTeams: section.maxTeams || "",
-        registrationOpenDate: section.registrationOpenDate || "",
-        tournamentDate: section.tournamentDate || "",
+        description: section.description || "",
+        maxTeams: section.capacity || section.maxTeams || "",
+        price: section.price || "",
+        registrationOpenDate: formatDate(section.registrationOpenDate),
+        tournamentDate: formatDate(section.tournamentDate),
         tournamentTime: section.tournamentTime || "",
       });
     } else {
       // New section defaults
       setFormData({
-        id: Date.now().toString(),
+        _id: "",
         title: "",
+        description: "",
         maxTeams: "",
+        price: "",
         registrationOpenDate: "",
         tournamentDate: "",
         tournamentTime: "",
@@ -45,11 +61,26 @@ const PickleballSectionDialog = ({
   }, [section, isOpen]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const { name, value, type } = e.target;
+
+    // For numeric inputs, ensure they're numbers
+    if (name === "maxTeams" || name === "price") {
+      // Remove non-numeric characters except decimal point for price
+      const numericValue =
+        name === "price"
+          ? value.replace(/[^\d.]/g, "")
+          : value.replace(/\D/g, "");
+
+      setFormData({
+        ...formData,
+        [name]: numericValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSubmit = (e) => {
@@ -58,7 +89,7 @@ const PickleballSectionDialog = ({
 
     // Basic validation
     if (!formData.title.trim()) {
-      setError("Section title is required");
+      setError("Division title is required");
       return;
     }
 
@@ -68,12 +99,40 @@ const PickleballSectionDialog = ({
       return;
     }
 
-    onSave(formData);
+    // Validate price if provided
+    if (formData.price && isNaN(parseFloat(formData.price))) {
+      setError("Price must be a valid number");
+      return;
+    }
+
+    // Make sure the registration date is before or equal to tournament date
+    if (formData.registrationOpenDate && formData.tournamentDate) {
+      const regDate = new Date(formData.registrationOpenDate);
+      const tournDate = new Date(formData.tournamentDate);
+
+      if (regDate > tournDate) {
+        setError("Registration open date must be before tournament date");
+        return;
+      }
+    }
+
+    // Prepare data for saving
+    const sectionData = {
+      ...formData,
+      // Ensure capacity and maxTeams are the same
+      capacity: formData.maxTeams ? parseInt(formData.maxTeams) : null,
+      // Format price as a number
+      price: formData.price ? parseFloat(formData.price) : null,
+    };
+
+    onSave(sectionData);
   };
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this section?")) {
-      onDelete(formData.id);
+    if (formData._id) {
+      onDelete(formData._id);
+    } else {
+      onClose();
     }
   };
 
@@ -82,13 +141,13 @@ const PickleballSectionDialog = ({
   return (
     <div className="pickleball-dialog-overlay">
       <div className="pickleball-dialog-content">
-        <h2>{section ? "Edit Section" : "Add Section"}</h2>
+        <h2>{section ? "Edit Division" : "Add Division"}</h2>
 
         {error && <div className="dialog-error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="title">Section Title</label>
+            <label htmlFor="title">Division Title</label>
             <input
               type="text"
               id="title"
@@ -97,19 +156,58 @@ const PickleballSectionDialog = ({
               onChange={handleInputChange}
               placeholder="e.g., Men's Doubles Division"
               required
+              disabled={isSaving}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="maxTeams">Maximum Teams</label>
-            <input
-              type="number"
-              id="maxTeams"
-              name="maxTeams"
-              value={formData.maxTeams}
+            <label htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
               onChange={handleInputChange}
-              placeholder="e.g., 24"
-            />
+              placeholder="Describe this division, rules, requirements, etc."
+              rows="3"
+              disabled={isSaving}
+            ></textarea>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="maxTeams">Maximum Teams (Capacity)</label>
+              <input
+                type="number"
+                id="maxTeams"
+                name="maxTeams"
+                value={formData.maxTeams}
+                onChange={handleInputChange}
+                placeholder="e.g., 24"
+                min="1"
+                disabled={isSaving}
+              />
+              <small className="help-text">
+                Leave empty for unlimited capacity
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="price">Price Per Team ($)</label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                value={formData.price}
+                onChange={handleInputChange}
+                placeholder="e.g., 25"
+                min="0"
+                step="0.01"
+                disabled={isSaving}
+              />
+              <small className="help-text">
+                Leave empty to use event default
+              </small>
+            </div>
           </div>
 
           <div className="form-group">
@@ -120,7 +218,11 @@ const PickleballSectionDialog = ({
               name="registrationOpenDate"
               value={formData.registrationOpenDate}
               onChange={handleInputChange}
+              disabled={isSaving}
             />
+            <small className="help-text">
+              When registration becomes available
+            </small>
           </div>
 
           <div className="form-row">
@@ -132,6 +234,7 @@ const PickleballSectionDialog = ({
                 name="tournamentDate"
                 value={formData.tournamentDate}
                 onChange={handleInputChange}
+                disabled={isSaving}
               />
             </div>
 
@@ -143,25 +246,36 @@ const PickleballSectionDialog = ({
                 name="tournamentTime"
                 value={formData.tournamentTime}
                 onChange={handleInputChange}
+                disabled={isSaving}
               />
             </div>
           </div>
 
           <div className="dialog-actions">
-            {section && (
+            {section && section._id && (
               <button
                 type="button"
                 className="delete-btn"
                 onClick={handleDelete}
+                disabled={isSaving}
               >
                 Delete
               </button>
             )}
-            <button type="button" className="cancel-btn" onClick={onClose}>
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={onClose}
+              disabled={isSaving}
+            >
               Cancel
             </button>
-            <button type="submit" className="submit-btn">
-              {section ? "Save Changes" : "Add Section"}
+            <button type="submit" className="submit-btn" disabled={isSaving}>
+              {isSaving
+                ? "Saving..."
+                : section
+                ? "Save Changes"
+                : "Add Division"}
             </button>
           </div>
         </form>

@@ -2,16 +2,21 @@
 import { useState, useEffect } from "react";
 import "./PickleballDialog.css";
 
-const EditPickleballDialog = ({ isOpen, onClose, eventData, onSave }) => {
+const EditPickleballDialog = ({
+  isOpen,
+  onClose,
+  eventData,
+  onSave,
+  isSaving,
+}) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     location: "",
-    pricePerTeam: "$25",
+    pricePerTeam: "",
     startDate: "",
     endDate: "",
     isPublished: true,
-    // Image gallery will be handled separately
   });
 
   const [error, setError] = useState("");
@@ -19,17 +24,20 @@ const EditPickleballDialog = ({ isOpen, onClose, eventData, onSave }) => {
   // Initialize form when event data changes
   useEffect(() => {
     if (eventData) {
+      // Fix date formatting issues by adjusting for timezone
+      const formatDate = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toISOString().split("T")[0];
+      };
+
       setFormData({
         title: eventData.title || "",
         description: eventData.description || "",
         location: eventData.location || "",
-        pricePerTeam: eventData.pricePerTeam || "$25",
-        startDate: eventData.startDate
-          ? new Date(eventData.startDate).toISOString().split("T")[0]
-          : "",
-        endDate: eventData.endDate
-          ? new Date(eventData.endDate).toISOString().split("T")[0]
-          : "",
+        pricePerTeam: eventData.pricePerTeam || "25",
+        startDate: formatDate(eventData.startDate),
+        endDate: formatDate(eventData.endDate),
         isPublished:
           eventData.isPublished !== undefined ? eventData.isPublished : true,
       });
@@ -37,10 +45,28 @@ const EditPickleballDialog = ({ isOpen, onClose, eventData, onSave }) => {
   }, [eventData, isOpen]);
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
+
+    // For numeric inputs, ensure they're numbers
+    if (name === "pricePerTeam") {
+      // Remove non-numeric characters except decimal point
+      const numericValue = value.replace(/[^\d.]/g, "");
+      setFormData({
+        ...formData,
+        [name]: numericValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const togglePublished = () => {
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? checked : value,
+      isPublished: !formData.isPublished,
     });
   };
 
@@ -59,7 +85,21 @@ const EditPickleballDialog = ({ isOpen, onClose, eventData, onSave }) => {
       return;
     }
 
-    onSave(formData);
+    // Validate price format if provided
+    if (formData.pricePerTeam && isNaN(parseFloat(formData.pricePerTeam))) {
+      setError("Price must be a valid number");
+      return;
+    }
+
+    // Format price as a currency for display
+    const formattedData = {
+      ...formData,
+      pricePerTeam: formData.pricePerTeam
+        ? `$${parseFloat(formData.pricePerTeam).toFixed(2)}`
+        : "$25.00",
+    };
+
+    onSave(formattedData);
   };
 
   if (!isOpen) return null;
@@ -81,6 +121,7 @@ const EditPickleballDialog = ({ isOpen, onClose, eventData, onSave }) => {
               value={formData.title}
               onChange={handleInputChange}
               required
+              disabled={isSaving}
             />
           </div>
 
@@ -93,6 +134,7 @@ const EditPickleballDialog = ({ isOpen, onClose, eventData, onSave }) => {
               onChange={handleInputChange}
               rows="5"
               placeholder="Enter tournament description"
+              disabled={isSaving}
             ></textarea>
           </div>
 
@@ -105,18 +147,22 @@ const EditPickleballDialog = ({ isOpen, onClose, eventData, onSave }) => {
               value={formData.location}
               onChange={handleInputChange}
               placeholder="e.g., Community Recreation Center"
+              disabled={isSaving}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="pricePerTeam">Price Per Team</label>
+            <label htmlFor="pricePerTeam">Price Per Team ($)</label>
             <input
-              type="text"
+              type="number"
               id="pricePerTeam"
               name="pricePerTeam"
               value={formData.pricePerTeam}
               onChange={handleInputChange}
-              placeholder="e.g., $25"
+              placeholder="25"
+              min="0"
+              step="0.01"
+              disabled={isSaving}
             />
           </div>
 
@@ -130,6 +176,7 @@ const EditPickleballDialog = ({ isOpen, onClose, eventData, onSave }) => {
                 value={formData.startDate}
                 onChange={handleInputChange}
                 required
+                disabled={isSaving}
               />
             </div>
 
@@ -142,28 +189,41 @@ const EditPickleballDialog = ({ isOpen, onClose, eventData, onSave }) => {
                 value={formData.endDate}
                 onChange={handleInputChange}
                 required
+                disabled={isSaving}
               />
             </div>
           </div>
 
-          <div className="form-group checkbox-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="isPublished"
-                checked={formData.isPublished}
-                onChange={handleInputChange}
-              />
-              Publish Tournament
-            </label>
+          <div className="form-group publish-toggle">
+            <label>Publication Status</label>
+            <button
+              type="button"
+              className={`publish-toggle-button ${
+                formData.isPublished ? "published" : "unpublished"
+              }`}
+              onClick={togglePublished}
+              disabled={isSaving}
+            >
+              {formData.isPublished ? "Published" : "Unpublished"}
+            </button>
+            <small className="help-text">
+              {formData.isPublished
+                ? "Tournament is visible to the public"
+                : "Tournament is only visible to administrators"}
+            </small>
           </div>
 
           <div className="dialog-actions">
-            <button type="button" className="cancel-btn" onClick={onClose}>
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={onClose}
+              disabled={isSaving}
+            >
               Cancel
             </button>
-            <button type="submit" className="submit-btn">
-              Save Changes
+            <button type="submit" className="submit-btn" disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>
