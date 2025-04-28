@@ -3,38 +3,26 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import useEvents from "../hooks/useEvents";
-import AddEventDialog from "../components/AddEventDialog";
+import { useAuth } from "../context/AuthContext";
 import {
   getImageUrl,
   handleImageError,
   getEventPrimaryImage,
 } from "../utils/imageUtils";
-
-// Material UI imports
-import {
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActions,
-  Grid,
-  Container,
-  Box,
-  Divider,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import "./styles/EventsPage.css";
 
 function EventsPage() {
   const [events, setEvents] = useState([]);
   const { getEvents, loading, error } = useEvents();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { isAuthenticated, hasRole } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Check if user is admin
+    if (isAuthenticated && hasRole) {
+      setIsAdmin(hasRole("admin"));
+    }
+  }, [isAuthenticated, hasRole]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -70,207 +58,74 @@ function EventsPage() {
     return `${format(start, "MMMM d, yyyy")} - ${format(end, "MMMM d, yyyy")}`;
   };
 
-  // Separate published and unpublished events
-  const publishedEvents = events.filter((event) => event.isPublished);
-  const unpublishedEvents = events.filter((event) => !event.isPublished);
-
-  // Event card component for DRY code
-  const EventCard = ({ event }) => (
-    <Card
-      sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        border: event.isPublished ? "none" : "1px dashed #ccc",
-        opacity: event.isPublished ? 1 : 0.85,
-        transition: "transform 0.3s, box-shadow 0.3s",
-        "&:hover": {
-          transform: "translateY(-5px)",
-          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
-        },
-      }}
-    >
-      <CardMedia
-        component="img"
-        height="200"
-        image={getEventPrimaryImage(event)}
-        alt={
-          event.imageGallery && event.imageGallery.length > 0
-            ? event.imageGallery[0].name
-            : event.title
-        }
-        sx={{ objectFit: "cover" }}
-        onError={handleImageError}
-      />
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          {event.title}
-        </Typography>
-
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <CalendarTodayIcon
-            fontSize="small"
-            sx={{ mr: 1, color: "text.secondary" }}
-          />
-          <Typography variant="body2" color="text.secondary">
-            {formatEventDate(event.startDate, event.endDate)}
-          </Typography>
-        </Box>
-
-        {event.location && (
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <LocationOnIcon
-              fontSize="small"
-              sx={{ mr: 1, color: "text.secondary" }}
-            />
-            <Typography variant="body2" color="text.secondary">
-              {event.location}
-            </Typography>
-          </Box>
-        )}
-
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          {event.description && event.description.length > 150
-            ? `${event.description.substring(0, 150)}...`
-            : event.description}
-        </Typography>
-      </CardContent>
-
-      <CardActions sx={{ p: 2, mt: "auto" }}>
-        <Button
-          component={Link}
-          to={`/events/${event.titleSlug}`}
-          variant="contained"
-          size="small"
-          startIcon={<VisibilityIcon />}
-        >
-          View
-        </Button>
-        <Button
-          component={Link}
-          to={`/events/edit/${event.titleSlug}`}
-          variant="outlined"
-          color="success"
-          size="small"
-          startIcon={<EditIcon />}
-          sx={{ ml: 1 }}
-        >
-          Edit
-        </Button>
-      </CardActions>
-    </Card>
-  );
+  // Filter events - if user is admin, show all; otherwise, show only published
+  const filteredEvents = isAdmin
+    ? events
+    : events.filter((event) => event.isPublished);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 4,
-        }}
-      >
-        <Typography variant="h4" component="h1">
-          Events
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={() => setIsDialogOpen(true)}
-        >
-          Add New Event
-        </Button>
-      </Box>
+    <div className="events-container">
+      <h1>Events</h1>
 
-      {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-          <CircularProgress />
-        </Box>
+      {loading && <div className="loading-message">Loading events...</div>}
+
+      {error && <div className="error-message">{error}</div>}
+
+      <div className="events-list">
+        {filteredEvents.map((event) => (
+          <div className="event-card" key={event._id || event.titleSlug}>
+            {isAdmin && !event.isPublished && (
+              <div className="unpublished-badge">Unpublished</div>
+            )}
+            <div className="event-image">
+              <img
+                src={getEventPrimaryImage(event)}
+                alt={
+                  event.imageGallery && event.imageGallery.length > 0
+                    ? event.imageGallery[0].name
+                    : event.title
+                }
+                onError={handleImageError}
+              />
+            </div>
+            <div className="event-details">
+              <h2>{event.title}</h2>
+              <div className="event-date">
+                {formatEventDate(event.startDate, event.endDate)}
+              </div>
+              {event.location && (
+                <div className="event-location">{event.location}</div>
+              )}
+              <div className="event-description">
+                {event.description && event.description.length > 150
+                  ? `${event.description.substring(0, 150)}...`
+                  : event.description}
+              </div>
+
+              <div className="event-button-container">
+                {/* For Pickleball, use dedicated page; for others, use dynamic route */}
+                {event.titleSlug === "pickleball-tournament" ? (
+                  <Link to="/events/pickleball" className="event-button">
+                    View Details
+                  </Link>
+                ) : (
+                  <Link
+                    to={`/events/${event.titleSlug}`}
+                    className="event-button"
+                  >
+                    View Details
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {filteredEvents.length === 0 && !loading && (
+        <div className="no-events-message">No events found.</div>
       )}
-
-      {error && (
-        <Alert severity="error" sx={{ my: 2 }}>
-          Error loading events: {error}
-        </Alert>
-      )}
-
-      {!loading && !error && events.length === 0 && (
-        <Alert severity="info" sx={{ my: 2 }}>
-          No events found.
-        </Alert>
-      )}
-
-      {/* Published Events Section */}
-      <Box sx={{ mb: 6 }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Published Events
-        </Typography>
-        <Divider sx={{ mb: 3 }} />
-
-        {publishedEvents.length === 0 ? (
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ fontStyle: "italic" }}
-          >
-            No published events at this time.
-          </Typography>
-        ) : (
-          <Grid container spacing={3}>
-            {publishedEvents.map((event) => (
-              <Grid
-                item
-                xs={12}
-                sm={6}
-                md={4}
-                key={event.titleSlug || event._id}
-              >
-                <EventCard event={event} />
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Box>
-
-      {/* Unpublished Events Section */}
-      <Box>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Unpublished Events
-        </Typography>
-        <Divider sx={{ mb: 3 }} />
-
-        {unpublishedEvents.length === 0 ? (
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ fontStyle: "italic" }}
-          >
-            No unpublished events at this time.
-          </Typography>
-        ) : (
-          <Grid container spacing={3}>
-            {unpublishedEvents.map((event) => (
-              <Grid
-                item
-                xs={12}
-                sm={6}
-                md={4}
-                key={event.titleSlug || event._id}
-              >
-                <EventCard event={event} />
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Box>
-
-      <AddEventDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-      />
-    </Container>
+    </div>
   );
 }
 

@@ -9,6 +9,9 @@ import EventPage from "./pages/EventPage";
 import EditEventPage from "./pages/EditEventPage";
 import AccountPage from "./pages/AccountPage";
 
+// Import dedicated event pages
+import PickleballPage from "./pages/PickleballPage";
+
 // Import auth pages
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -61,6 +64,18 @@ const Router = () => {
           </Layout>
         }
       />
+
+      {/* Special dedicated event pages */}
+      <Route
+        path="/events/pickleball"
+        element={
+          <Layout>
+            <PickleballPage />
+          </Layout>
+        }
+      />
+
+      {/* Dynamic event route (used for most events) */}
       <Route
         path="/events/:slug"
         element={
@@ -69,6 +84,29 @@ const Router = () => {
           </Layout>
         }
       />
+
+      {/* Event editing route */}
+      <Route
+        path="/events/edit/:slug"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <EditEventPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Registration placeholder */}
+      <Route
+        path="/register/pickleball"
+        element={
+          <Layout>
+            <PlaceholderPage title="Pickleball Tournament Registration" />
+          </Layout>
+        }
+      />
+
       <Route
         path="/calendar"
         element={
@@ -163,18 +201,8 @@ const Router = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/events/edit/:slug"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <EditEventPage />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
 
-      {/* Admin Routes (can add more later) */}
+      {/* Admin Routes */}
       <Route
         path="/admin/*"
         element={

@@ -1,0 +1,321 @@
+/* src/pages/styles/PickleballPage.css */
+.pickleball-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Loading and Error States */
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 3rem 0;
+  gap: 1.5rem;
+}
+
+.loading-message {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.error-message {
+  padding: 1.5rem;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  border-left: 4px solid #c62828;
+  max-width: 600px;
+  width: 100%;
+}
+
+/* Header Section */
+.pickleball-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.pickleball-header h1 {
+  color: var(--primary-color);
+  font-size: 2.25rem;
+  margin-bottom: 1rem;
+}
+
+.pickleball-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta-label {
+  font-weight: bold;
+  color: #555;
+}
+
+.admin-actions {
+  margin-left: 1rem;
+}
+
+.edit-tournament-button {
+  background-color: #f57c00;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.edit-tournament-button:hover {
+  background-color: #ef6c00;
+}
+
+/* Main Content */
+.pickleball-content {
+  margin-bottom: 2rem;
+}
+
+.pickleball-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+}
+
+/* Tournament Sections */
+.pickleball-sections {
+  margin-bottom: 3rem;
+}
+
+.sections-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.pickleball-sections h2 {
+  color: var(--primary-color);
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.add-section-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.add-section-button:hover {
+  background-color: #1565c0;
+}
+
+.no-sections-message {
+  background-color: #f5f5f5;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.sections-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.section-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.section-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--primary-color);
+}
+
+.edit-section-button {
+  background-color: transparent;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.edit-section-button:hover {
+  background-color: #1976d2;
+  color: white;
+}
+
+.section-details {
+  color: #333;
+}
+
+.section-info {
+  margin-bottom: 1.25rem;
+}
+
+.info-item {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #555;
+  min-width: 120px;
+}
+
+.section-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.register-button {
+  background-color: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: inline-block;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.2s;
+  width: 100%;
+}
+
+.register-button:hover {
+  background-color: #1565c0;
+  transform: translateY(-2px);
+}
+
+/* Event Image Section */
+.pickleball-image {
+  margin-top: 3rem;
+}
+
+.pickleball-image h2 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+}
+
+.image-container {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Back Navigation */
+.back-navigation {
+  margin-top: 3rem;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .pickleball-header {
+    flex-direction: column;
+  }
+
+  .admin-actions {
+    margin-left: 0;
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .edit-tournament-button {
+    width: 100%;
+  }
+
+  .pickleball-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .pickleball-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sections-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .add-section-button {
+    width: 100%;
+  }
+
+  .sections-list {
+    grid-template-columns: 1fr;
+  }
+}
