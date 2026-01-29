@@ -1,6 +1,8 @@
 // src/components/layout/Header.jsx
 import { Link, useNavigate } from "react-router-dom";
 import "./Header.css";
+import { IconButton } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 
 function Header({ toggleSidebar, isAuthenticated, user }) {
   const navigate = useNavigate();
@@ -13,9 +15,17 @@ function Header({ toggleSidebar, isAuthenticated, user }) {
     <header className="header">
       <div className="header-container">
         <div className="header-left">
-          <button className="hamburger-button" onClick={toggleSidebar}>
-            ☰
-          </button>
+          <IconButton
+            onClick={toggleSidebar}
+            aria-label="menu"
+            sx={{
+              color: "white",
+              marginRight: "1rem",
+              "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+            }}
+          >
+            <MenuIcon sx={{ fontSize: "1.75rem" }} />
+          </IconButton>
           <h1 className="site-title">
             <Link to="/">Country Fair Days</Link>
           </h1>

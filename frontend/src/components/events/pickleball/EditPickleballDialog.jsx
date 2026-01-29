@@ -1,6 +1,9 @@
 // src/components/events/pickleball/EditPickleballDialog.jsx
 import { useState, useEffect } from "react";
 import "./PickleballDialog.css";
+import { IconButton, Checkbox, FormControlLabel } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 
 const EditPickleballDialog = ({
   isOpen,
@@ -14,8 +17,7 @@ const EditPickleballDialog = ({
     description: "",
     location: "",
     pricePerTeam: "",
-    startDate: "",
-    endDate: "",
+    eventDates: [],
     isPublished: true,
   });
 
@@ -24,32 +26,58 @@ const EditPickleballDialog = ({
   // Initialize form when event data changes
   useEffect(() => {
     if (eventData) {
-      // Fix date formatting issues by adjusting for timezone
-      const formatDate = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        return date.toISOString().split("T")[0];
-      };
+      // Convert old startDate/endDate format to eventDates array if needed
+      let dates = [];
+      if (eventData.eventDates && eventData.eventDates.length > 0) {
+        dates = eventData.eventDates.map((d) => ({
+          startDate: new Date(d.startDate).toISOString().split("T")[0],
+          endDate: new Date(d.endDate).toISOString().split("T")[0],
+          isSingleDay: d.startDate === d.endDate,
+        }));
+      } else if (eventData.startDate && eventData.endDate) {
+        // Legacy support: convert old single date range to new format
+        const start = new Date(eventData.startDate).toISOString().split("T")[0];
+        const end = new Date(eventData.endDate).toISOString().split("T")[0];
+        dates = [
+          {
+            startDate: start,
+            endDate: end,
+            isSingleDay: start === end,
+          },
+        ];
+      }
 
       setFormData({
         title: eventData.title || "",
         description: eventData.description || "",
         location: eventData.location || "",
         pricePerTeam: eventData.pricePerTeam || "25",
-        startDate: formatDate(eventData.startDate),
-        endDate: formatDate(eventData.endDate),
+        eventDates: dates,
         isPublished:
           eventData.isPublished !== undefined ? eventData.isPublished : true,
       });
     }
   }, [eventData, isOpen]);
 
+  // Handle ESC key to close dialog
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && isOpen && !isSaving) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [isOpen, isSaving, onClose]);
+
   const handleInputChange = (e) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
     // For numeric inputs, ensure they're numbers
     if (name === "pricePerTeam") {
-      // Remove non-numeric characters except decimal point
       const numericValue = value.replace(/[^\d.]/g, "");
       setFormData({
         ...formData,
@@ -61,6 +89,54 @@ const EditPickleballDialog = ({
         [name]: value,
       });
     }
+  };
+
+  const handleDateChange = (index, field, value) => {
+    const updatedDates = [...formData.eventDates];
+    updatedDates[index][field] = value;
+
+    // If it's a single day event, sync the end date with start date
+    if (updatedDates[index].isSingleDay && field === "startDate") {
+      updatedDates[index].endDate = value;
+    }
+
+    setFormData({
+      ...formData,
+      eventDates: updatedDates,
+    });
+  };
+
+  const handleSingleDayToggle = (index) => {
+    const updatedDates = [...formData.eventDates];
+    updatedDates[index].isSingleDay = !updatedDates[index].isSingleDay;
+
+    // If toggling to single day, set end date same as start date
+    if (updatedDates[index].isSingleDay) {
+      updatedDates[index].endDate = updatedDates[index].startDate;
+    }
+
+    setFormData({
+      ...formData,
+      eventDates: updatedDates,
+    });
+  };
+
+  const handleAddDate = () => {
+    setFormData({
+      ...formData,
+      eventDates: [
+        ...formData.eventDates,
+        { startDate: "", endDate: "", isSingleDay: false },
+      ],
+    });
+  };
+
+  const handleRemoveDate = (index) => {
+    const updatedDates = formData.eventDates.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      eventDates: updatedDates,
+    });
   };
 
   const togglePublished = () => {
@@ -80,9 +156,28 @@ const EditPickleballDialog = ({
       return;
     }
 
-    if (!formData.startDate || !formData.endDate) {
-      setError("Tournament start and end dates are required");
-      return;
+    // Validate dates
+    if (formData.eventDates.length > 0) {
+      for (let i = 0; i < formData.eventDates.length; i++) {
+        const dateRange = formData.eventDates[i];
+        if (!dateRange.startDate) {
+          setError(`Date ${i + 1} must have a start date`);
+          return;
+        }
+        if (!dateRange.isSingleDay && !dateRange.endDate) {
+          setError(
+            `Date ${i + 1} must have an end date or be marked as single day`,
+          );
+          return;
+        }
+        if (
+          !dateRange.isSingleDay &&
+          new Date(dateRange.startDate) > new Date(dateRange.endDate)
+        ) {
+          setError(`Date ${i + 1}: end date must be after start date`);
+          return;
+        }
+      }
     }
 
     // Validate price format if provided
@@ -91,12 +186,21 @@ const EditPickleballDialog = ({
       return;
     }
 
-    // Format price as a currency for display
+    // Sort dates before saving
+    const sortedDates = [...formData.eventDates].sort(
+      (a, b) => new Date(a.startDate) - new Date(b.startDate),
+    );
+
+    // Format data for saving
     const formattedData = {
       ...formData,
+      eventDates: sortedDates,
       pricePerTeam: formData.pricePerTeam
-        ? `$${parseFloat(formData.pricePerTeam).toFixed(2)}`
-        : "$25.00",
+        ? `$${parseFloat(formData.pricePerTeam)} per team`
+        : "$25 per team",
+      // Also set startDate and endDate to first date range for backward compatibility
+      startDate: sortedDates.length > 0 ? sortedDates[0].startDate : null,
+      endDate: sortedDates.length > 0 ? sortedDates[0].endDate : null,
     };
 
     onSave(formattedData);
@@ -105,9 +209,12 @@ const EditPickleballDialog = ({
   if (!isOpen) return null;
 
   return (
-    <div className="pickleball-dialog-overlay">
-      <div className="pickleball-dialog-content">
-        <h2>Edit Pickleball Tournament</h2>
+    <div className="pickleball-dialog-overlay" onClick={onClose}>
+      <div
+        className="pickleball-dialog-content"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2>Edit Tournament</h2>
 
         {error && <div className="dialog-error">{error}</div>}
 
@@ -122,6 +229,7 @@ const EditPickleballDialog = ({
               onChange={handleInputChange}
               required
               disabled={isSaving}
+              placeholder="e.g., Annual Pickleball Tournament"
             />
           </div>
 
@@ -132,9 +240,9 @@ const EditPickleballDialog = ({
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              rows="5"
-              placeholder="Enter tournament description"
+              rows="4"
               disabled={isSaving}
+              placeholder="Describe the tournament..."
             ></textarea>
           </div>
 
@@ -146,8 +254,8 @@ const EditPickleballDialog = ({
               name="location"
               value={formData.location}
               onChange={handleInputChange}
-              placeholder="e.g., Community Recreation Center"
               disabled={isSaving}
+              placeholder="e.g., City Park Pickleball Courts"
             />
           </div>
 
@@ -159,39 +267,90 @@ const EditPickleballDialog = ({
               name="pricePerTeam"
               value={formData.pricePerTeam}
               onChange={handleInputChange}
-              placeholder="25"
               min="0"
               step="0.01"
               disabled={isSaving}
+              placeholder="25"
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="startDate">Start Date</label>
-              <input
-                type="date"
-                id="startDate"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleInputChange}
-                required
+          <div className="form-group">
+            <div className="dates-header">
+              <label>Tournament Dates</label>
+              <button
+                type="button"
+                className="add-date-button"
+                onClick={handleAddDate}
                 disabled={isSaving}
-              />
+              >
+                <AddIcon sx={{ fontSize: "1rem", marginRight: "0.25rem" }} />
+                Add Date
+              </button>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="endDate">End Date</label>
-              <input
-                type="date"
-                id="endDate"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleInputChange}
-                required
-                disabled={isSaving}
-              />
-            </div>
+            {formData.eventDates.length === 0 ? (
+              <div className="no-dates-message">
+                No dates added yet. Click "Add Date" to add tournament dates.
+              </div>
+            ) : (
+              <div className="dates-list">
+                {/* Don't sort during editing - keep in original order */}
+                {formData.eventDates.map((dateRange, index) => (
+                  <div key={index} className="date-range-item">
+                    <div className="date-inputs-container">
+                      <div className="date-inputs">
+                        <div className="date-input-group">
+                          <label>Start Date</label>
+                          <input
+                            type="date"
+                            value={dateRange.startDate}
+                            onChange={(e) =>
+                              handleDateChange(
+                                index,
+                                "startDate",
+                                e.target.value,
+                              )
+                            }
+                            disabled={isSaving}
+                          />
+                        </div>
+                        <div className="date-input-group">
+                          <label>End Date</label>
+                          <input
+                            type="date"
+                            value={dateRange.endDate}
+                            onChange={(e) =>
+                              handleDateChange(index, "endDate", e.target.value)
+                            }
+                            disabled={isSaving || dateRange.isSingleDay}
+                          />
+                        </div>
+                      </div>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={dateRange.isSingleDay}
+                            onChange={() => handleSingleDayToggle(index)}
+                            disabled={isSaving}
+                          />
+                        }
+                        label="Single day event"
+                        className="single-day-checkbox"
+                      />
+                    </div>
+                    <IconButton
+                      onClick={() => handleRemoveDate(index)}
+                      disabled={isSaving}
+                      color="error"
+                      size="small"
+                      aria-label="delete date"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="form-group publish-toggle">

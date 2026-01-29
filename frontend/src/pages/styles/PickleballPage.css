@@ -1,58 +1,8 @@
 /* src/pages/styles/PickleballPage.css */
 .pickleball-container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
-}
-
-/* Success message */
-.success-message {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  border-left: 4px solid #2e7d32;
-  text-align: center;
-  animation: fadeOut 5s forwards;
-}
-
-@keyframes fadeOut {
-  0% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-/* Loading and Error States */
-.loading-container,
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 3rem 0;
-  gap: 1.5rem;
-}
-
-.loading-message {
-  font-size: 1.1rem;
-  color: #666;
-}
-
-.error-message {
-  padding: 1.5rem;
-  background-color: #ffebee;
-  color: #c62828;
-  border-radius: 4px;
-  border-left: 4px solid #c62828;
-  max-width: 600px;
-  width: 100%;
 }
 
 /* Header Section */
@@ -62,7 +12,7 @@
   align-items: flex-start;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid #eee;
 }
 
 .header-content {
@@ -71,33 +21,39 @@
 
 .pickleball-header h1 {
   color: var(--primary-color);
-  font-size: 2.25rem;
-  margin-bottom: 1rem;
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
 }
 
 .pickleball-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
+  margin-top: 1rem;
 }
 
 .meta-item {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .meta-label {
-  font-weight: bold;
+  font-weight: 600;
   color: #555;
+  font-size: 0.9rem;
 }
 
-/* Status Badges */
+.meta-item > span:last-child {
+  font-size: 1rem;
+  color: #333;
+}
+
 .status-badge {
   display: inline-block;
-  padding: 0.3rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
   font-weight: 600;
   margin-bottom: 1rem;
 }
@@ -116,21 +72,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.toggle-publish-button {
-  background-color: #f5f5f5;
-  color: #333;
-  border: 1px solid #ddd;
-  padding: 0.6rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s;
-}
-
-.toggle-publish-button:hover {
-  background-color: #e0e0e0;
 }
 
 .edit-tournament-button {
@@ -153,17 +94,13 @@
   margin-bottom: 2rem;
 }
 
-.tournament-image-slider {
-  margin-bottom: 2rem;
-}
-
 .pickleball-description {
   font-size: 1.1rem;
   line-height: 1.6;
   margin-bottom: 2.5rem;
 }
 
-/* Tournament Sections */
+/* Tournament Sections/Divisions */
 .pickleball-sections {
   margin-bottom: 3rem;
 }
@@ -205,9 +142,9 @@
   font-style: italic;
 }
 
-.sections-grid {
+.sections-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
   gap: 1.5rem;
 }
 
@@ -216,7 +153,11 @@
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
 }
 
 .section-card:hover {
@@ -257,43 +198,50 @@
 
 .section-details {
   color: #333;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .section-info {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
+  flex: 1;
 }
 
 .info-item {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 0.5rem;
+  line-height: 1.5;
 }
 
 .info-label {
   font-weight: 600;
   color: #555;
-  min-width: 120px;
+  min-width: 150px;
+  flex-shrink: 0;
 }
 
 .section-action {
   display: flex;
   justify-content: center;
-  margin-top: 1.5rem;
+  padding-top: 0.5rem;
 }
 
 .register-button {
   background-color: var(--primary-color);
   color: white;
   text-decoration: none;
-  padding: 0.65rem 1.25rem;
+  padding: 0.65rem 1.5rem;
   border-radius: 4px;
   font-weight: 500;
   font-size: 0.95rem;
   display: inline-block;
   text-align: center;
-  transition: background-color 0.3s, transform 0.2s;
-  width: 100%;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
 }
 
 .register-button:hover {
@@ -301,27 +249,119 @@
   transform: translateY(-2px);
 }
 
-/* Event Image Section */
-.pickleball-image {
-  margin-top: 3rem;
+/* Image Gallery Hero Slider */
+.pickleball-gallery {
+  margin-bottom: 3rem;
 }
 
-.pickleball-image h2 {
+.pickleball-gallery h2 {
   color: var(--primary-color);
   margin-bottom: 1.5rem;
   font-size: 1.75rem;
 }
 
-.image-container {
+.gallery-hero-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.hero-image-wrapper {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  aspect-ratio: 16 / 9;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.image-container img {
+.hero-gallery-image {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
+}
+
+.gallery-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #333;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.gallery-nav-button:hover {
+  background-color: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.gallery-nav-button.prev {
+  left: 1rem;
+}
+
+.gallery-nav-button.next {
+  right: 1rem;
+}
+
+.gallery-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.gallery-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #ddd;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+  padding: 0;
+}
+
+.gallery-indicator.active {
+  background-color: var(--primary-color);
+  transform: scale(1.3);
+}
+
+.gallery-indicator:hover {
+  background-color: #aaa;
+}
+
+.edit-gallery-button {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  display: block;
+  margin: 1rem auto 0;
+}
+
+.edit-gallery-button:hover {
+  background-color: #e0e0e0;
 }
 
 /* Back Navigation */
@@ -345,7 +385,33 @@
   background-color: #e0e0e0;
 }
 
+/* Loading and Error States */
+.loading-container,
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+}
+
+.loading-message,
+.error-message {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.error-message {
+  color: #d32f2f;
+}
+
 /* Responsive Adjustments */
+@media (max-width: 900px) {
+  .sections-list {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
   .pickleball-header {
     flex-direction: column;
@@ -367,7 +433,7 @@
 
   .pickleball-meta {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .sections-header {
@@ -382,5 +448,40 @@
 
   .sections-list {
     grid-template-columns: 1fr;
+  }
+
+  .gallery-nav-button {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .gallery-nav-button.prev {
+    left: 0.5rem;
+  }
+
+  .gallery-nav-button.next {
+    right: 0.5rem;
+  }
+
+  .info-item {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .info-label {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .pickleball-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .gallery-nav-button {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
   }
 }

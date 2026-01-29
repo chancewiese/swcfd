@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { formatDateLocal } from "../utils/dateUtils";
 import useFamily from "../hooks/useFamily";
 import FamilyMemberDialog from "../components/family/FamilyMemberDialog";
 import ProfileDialog from "../components/profile/ProfileDialog";
@@ -136,7 +137,7 @@ const AccountPage = () => {
     // If another user is the manager, try to find their info
     if (familyData?.members) {
       const managerMember = familyData.members.find(
-        (member) => member.user === familyData.manager
+        (member) => member.user === familyData.manager,
       );
 
       if (managerMember) {
@@ -177,7 +178,7 @@ const AccountPage = () => {
       setEditingFamilyName(false);
     } catch (err) {
       setError(
-        "Failed to update family name: " + (err.message || "Unknown error")
+        "Failed to update family name: " + (err.message || "Unknown error"),
       );
     }
   };
@@ -209,7 +210,7 @@ const AccountPage = () => {
       return true;
     } catch (err) {
       setError(
-        "Failed to send invitation: " + (err.message || "Unknown error")
+        "Failed to send invitation: " + (err.message || "Unknown error"),
       );
       return false;
     }
@@ -244,7 +245,7 @@ const AccountPage = () => {
       return true;
     } catch (err) {
       setError(
-        "Failed to add family member: " + (err.message || "Unknown error")
+        "Failed to add family member: " + (err.message || "Unknown error"),
       );
       return false;
     }
@@ -265,7 +266,7 @@ const AccountPage = () => {
         return {
           ...prevData,
           members: prevData.members.map((member) =>
-            member._id === memberId ? updatedMember : member
+            member._id === memberId ? updatedMember : member,
           ),
         };
       });
@@ -274,7 +275,7 @@ const AccountPage = () => {
       return true;
     } catch (err) {
       setError(
-        "Failed to update family member: " + (err.message || "Unknown error")
+        "Failed to update family member: " + (err.message || "Unknown error"),
       );
       return false;
     }
@@ -308,7 +309,7 @@ const AccountPage = () => {
       return true;
     } catch (err) {
       setError(
-        "Failed to delete family member: " + (err.message || "Unknown error")
+        "Failed to delete family member: " + (err.message || "Unknown error"),
       );
       return false;
     }
@@ -375,7 +376,7 @@ const AccountPage = () => {
             <div className="info-item">
               <strong>Date of Birth:</strong>{" "}
               {profileData.dateOfBirth ? (
-                new Date(profileData.dateOfBirth).toLocaleDateString()
+                formatDateLocal(profileData.dateOfBirth)
               ) : (
                 <span className="no-data">Not provided</span>
               )}
@@ -507,9 +508,7 @@ const AccountPage = () => {
                             {member.dateOfBirth && (
                               <div className="member-info">
                                 <strong>Birth Date:</strong>{" "}
-                                {new Date(
-                                  member.dateOfBirth
-                                ).toLocaleDateString()}
+                                {formatDateLocal(member.dateOfBirth)}
                               </div>
                             )}
                             {member.gender && (

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { formatDateLocal } from "../../utils/dateUtils";
 
 const UserProfile = ({ auth, setAuth }) => {
   const [profileData, setProfileData] = useState({
@@ -158,7 +159,7 @@ const UserProfile = ({ auth, setAuth }) => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Failed to update profile. Please try again."
+          "Failed to update profile. Please try again.",
       );
       setSaving(false);
     }
@@ -332,7 +333,7 @@ const UserProfile = ({ auth, setAuth }) => {
             <div className="info-row">
               <strong>Date of Birth:</strong>{" "}
               {profileData.dateOfBirth
-                ? new Date(profileData.dateOfBirth).toLocaleDateString()
+                ? formatDateLocal(profileData.dateOfBirth)
                 : "Not provided"}
             </div>
             <div className="info-row">

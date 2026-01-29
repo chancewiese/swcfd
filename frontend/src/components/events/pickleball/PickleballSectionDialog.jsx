@@ -23,6 +23,20 @@ const PickleballSectionDialog = ({
 
   const [error, setError] = useState("");
 
+  // Handle ESC key to close dialog
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && isOpen && !isSaving) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [isOpen, isSaving, onClose]);
+
   // Initialize form data when section changes
   useEffect(() => {
     if (section) {
@@ -139,8 +153,11 @@ const PickleballSectionDialog = ({
   if (!isOpen) return null;
 
   return (
-    <div className="pickleball-dialog-overlay">
-      <div className="pickleball-dialog-content">
+    <div className="pickleball-dialog-overlay" onClick={onClose}>
+      <div
+        className="pickleball-dialog-content"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2>{section ? "Edit Division" : "Add Division"}</h2>
 
         {error && <div className="dialog-error">{error}</div>}
@@ -274,8 +291,8 @@ const PickleballSectionDialog = ({
               {isSaving
                 ? "Saving..."
                 : section
-                ? "Save Changes"
-                : "Add Division"}
+                  ? "Save Changes"
+                  : "Add Division"}
             </button>
           </div>
         </form>

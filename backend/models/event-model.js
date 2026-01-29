@@ -30,16 +30,30 @@ const EventSchema = new Schema(
       required: false,
       default: "",
     },
+    // Legacy single date range fields (kept for backward compatibility)
     startDate: {
       type: Date,
       required: false,
-      default: null, // Changed from Date.now to null
+      default: null,
     },
     endDate: {
       type: Date,
       required: false,
-      default: null, // Changed from function to null
+      default: null,
     },
+    // New multiple dates support
+    eventDates: [
+      {
+        startDate: {
+          type: Date,
+          required: true,
+        },
+        endDate: {
+          type: Date,
+          required: true,
+        },
+      },
+    ],
     imageGallery: [
       {
         name: {
@@ -70,7 +84,7 @@ const EventSchema = new Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Event", EventSchema);

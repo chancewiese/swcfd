@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import useEvents from "../hooks/useEvents";
 import EditPickleballDialog from "../components/events/pickleball/EditPickleballDialog";
 import PickleballSectionDialog from "../components/events/pickleball/PickleballSectionDialog";
+import GalleryEditDialog from "../components/events/pickleball/GalleryEditDialog";
 import { getImageUrl, handleImageError } from "../utils/imageUtils";
 import "./styles/PickleballPage.css";
 
@@ -22,6 +23,7 @@ const PickleballPage = () => {
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSectionDialogOpen, setIsSectionDialogOpen] = useState(false);
+  const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(-1);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -37,21 +39,22 @@ const PickleballPage = () => {
   }, [isAuthenticated, hasRole]);
 
   // Fetch the event data
-  useEffect(() => {
-    const fetchEventData = async () => {
-      try {
-        // Fetch the pickleball event data using slug
-        const response = await getEvent("pickleball-tournament");
-        if (response && response.data) {
-          setEventData(response.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch pickleball event data:", err);
+  const fetchEventData = async () => {
+    try {
+      const response = await getEvent("pickleball-tournament");
+      if (response && response.data) {
+        setEventData(response.data);
+        console.log("Event data loaded:", response.data);
+        console.log("Image gallery:", response.data.imageGallery);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch pickleball event data:", err);
+    }
+  };
 
+  useEffect(() => {
     fetchEventData();
-  }, [getEvent]);
+  }, []);
 
   const handleEditEvent = () => {
     setIsEditDialogOpen(true);
@@ -61,7 +64,6 @@ const PickleballPage = () => {
     setIsSaving(true);
 
     try {
-      // Format the data properly for the API
       const updatedEventData = {
         ...eventData,
         title: data.title,
@@ -69,20 +71,21 @@ const PickleballPage = () => {
         location: data.location,
         startDate: data.startDate,
         endDate: data.endDate,
+        eventDates: data.eventDates,
+        pricePerTeam: data.pricePerTeam,
         isPublished: data.isPublished,
-        pricePerTeam: data.pricePerTeam, // Custom field for pickleball
       };
 
-      // Save to the database through the API
-      const response = await updateEvent(eventData.titleSlug, updatedEventData);
+      await updateEvent(eventData.titleSlug, updatedEventData);
 
-      if (response && response.data) {
-        setEventData(response.data);
+      const refreshedEvent = await getEvent(eventData.titleSlug);
+      if (refreshedEvent && refreshedEvent.data) {
+        setEventData(refreshedEvent.data);
       }
 
       setIsEditDialogOpen(false);
     } catch (err) {
-      console.error("Failed to save event changes:", err);
+      console.error("Failed to save event:", err);
     } finally {
       setIsSaving(false);
     }
@@ -104,33 +107,16 @@ const PickleballPage = () => {
     setIsSaving(true);
 
     try {
-      // Format the section data properly for the API
-      const formattedSection = {
-        title: sectionData.title,
-        description: sectionData.description || "",
-        capacity: sectionData.maxTeams ? parseInt(sectionData.maxTeams) : null,
-        registrationOpenDate: sectionData.registrationOpenDate,
-        tournamentDate: sectionData.tournamentDate, // Custom field
-        tournamentTime: sectionData.tournamentTime, // Custom field
-        price: sectionData.price ? parseFloat(sectionData.price) : null, // Add price field
-      };
-
-      let response;
-
-      if (currentSectionIndex === -1) {
-        // Add new section
-        response = await addEventSection(eventData.titleSlug, formattedSection);
-      } else {
-        // Update existing section
-        const sectionId = eventData.sections[currentSectionIndex]._id;
-        response = await updateEventSection(
+      if (currentSection && currentSection._id) {
+        await updateEventSection(
           eventData.titleSlug,
-          sectionId,
-          formattedSection
+          currentSection._id,
+          sectionData,
         );
+      } else {
+        await addEventSection(eventData.titleSlug, sectionData);
       }
 
-      // Refetch the event data to get updated sections
       const updatedEvent = await getEvent(eventData.titleSlug);
       if (updatedEvent && updatedEvent.data) {
         setEventData(updatedEvent.data);
@@ -145,17 +131,15 @@ const PickleballPage = () => {
   };
 
   const handleDeleteSection = async (sectionId) => {
-    if (!window.confirm("Are you sure you want to delete this section?")) {
+    if (!sectionId) {
+      setIsSectionDialogOpen(false);
       return;
     }
 
     setIsSaving(true);
 
     try {
-      // Delete the section through the API
       await deleteEventSection(eventData.titleSlug, sectionId);
-
-      // Refetch the event data to get updated sections
       const updatedEvent = await getEvent(eventData.titleSlug);
       if (updatedEvent && updatedEvent.data) {
         setEventData(updatedEvent.data);
@@ -169,25 +153,103 @@ const PickleballPage = () => {
     }
   };
 
-  // Handle image gallery navigation
-  const handleThumbnailClick = (index) => {
-    setMainImageIndex(index);
+  const handleGalleryUpdated = async () => {
+    // Refresh event data to get updated gallery
+    await fetchEventData();
   };
 
-  // Helper function to format date and time
+  const handlePrevImage = () => {
+    setMainImageIndex((prev) =>
+      prev === 0 ? eventData.imageGallery.length - 1 : prev - 1,
+    );
+  };
+
+  const handleNextImage = () => {
+    setMainImageIndex((prev) =>
+      prev === eventData.imageGallery.length - 1 ? 0 : prev + 1,
+    );
+  };
+
+  // Format dates display
+  const formatDatesDisplay = (eventDates, startDate, endDate) => {
+    // Use eventDates if available, otherwise fall back to legacy startDate/endDate
+    let dates = [];
+
+    if (eventDates && eventDates.length > 0) {
+      dates = eventDates;
+    } else if (startDate && endDate) {
+      dates = [{ startDate, endDate }];
+    }
+
+    if (dates.length === 0) return "Dates TBD";
+
+    // Sort dates chronologically
+    const sortedDates = [...dates].sort(
+      (a, b) => new Date(a.startDate) - new Date(b.startDate),
+    );
+
+    // Format each date range
+    const formattedRanges = sortedDates.map((dateRange) => {
+      const start = new Date(dateRange.startDate);
+      const end = new Date(dateRange.endDate);
+
+      // Format dates
+      const startDay = start.getUTCDate();
+      const endDay = end.getUTCDate();
+      const startMonth = start.toLocaleDateString("en-US", {
+        month: "long",
+        timeZone: "UTC",
+      });
+      const endMonth = end.toLocaleDateString("en-US", {
+        month: "long",
+        timeZone: "UTC",
+      });
+      const startYear = start.getUTCFullYear();
+      const endYear = end.getUTCFullYear();
+
+      // Get ordinal suffix
+      const getOrdinal = (n) => {
+        const s = ["th", "st", "nd", "rd"];
+        const v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+      };
+
+      // Same day
+      if (
+        start.toISOString().split("T")[0] === end.toISOString().split("T")[0]
+      ) {
+        return `${startMonth} ${getOrdinal(startDay)}, ${startYear}`;
+      }
+
+      // Same month and year
+      if (startMonth === endMonth && startYear === endYear) {
+        return `${startMonth} ${getOrdinal(startDay)}-${getOrdinal(endDay)}, ${startYear}`;
+      }
+
+      // Same year, different months
+      if (startYear === endYear) {
+        return `${startMonth} ${getOrdinal(startDay)} - ${endMonth} ${getOrdinal(endDay)}, ${startYear}`;
+      }
+
+      // Different years
+      return `${startMonth} ${getOrdinal(startDay)}, ${startYear} - ${endMonth} ${getOrdinal(endDay)}, ${endYear}`;
+    });
+
+    // Join multiple ranges with commas
+    return formattedRanges.join(", ");
+  };
+
+  // Helper function to format date and time for sections
   const formatDateTime = (dateStr, timeStr) => {
     if (!dateStr) return "Date TBD";
 
-    // Fix the date issue by handling timezone offset
     const date = new Date(dateStr);
-    const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-    const correctedDate = new Date(date.getTime() + userTimezoneOffset);
-
-    const formattedDate = correctedDate.toLocaleDateString("en-US", {
+    const formattedDate = date.toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
       year: "numeric",
+      timeZone: "UTC",
     });
 
     if (!timeStr) return formattedDate;
@@ -230,8 +292,7 @@ const PickleballPage = () => {
     return (
       <div className="error-container">
         <div className="error-message">
-          Pickleball Tournament data not found. Please make sure you have
-          created an event with the slug "pickleball-tournament".
+          Pickleball Tournament data not found.
         </div>
         <Link to="/events" className="back-button">
           Back to Events
@@ -239,6 +300,12 @@ const PickleballPage = () => {
       </div>
     );
   }
+
+  const hasMultipleDates =
+    (eventData.eventDates && eventData.eventDates.length > 1) ||
+    (!eventData.eventDates && eventData.startDate !== eventData.endDate);
+
+  const hasImages = eventData.imageGallery && eventData.imageGallery.length > 0;
 
   return (
     <div className="pickleball-container">
@@ -249,15 +316,15 @@ const PickleballPage = () => {
 
           <div className="pickleball-meta">
             <div className="meta-item">
-              <span className="meta-label">Date:</span>
+              <span className="meta-label">
+                {hasMultipleDates ? "Dates:" : "Date:"}
+              </span>
               <span>
-                {eventData.startDate && eventData.endDate
-                  ? `${formatDateTime(eventData.startDate, null)
-                      .split(", ")
-                      .slice(0, -1)
-                      .join(", ")} - 
-                   ${formatDateTime(eventData.endDate, null)}`
-                  : "Dates TBD"}
+                {formatDatesDisplay(
+                  eventData.eventDates,
+                  eventData.startDate,
+                  eventData.endDate,
+                )}
               </span>
             </div>
 
@@ -279,12 +346,12 @@ const PickleballPage = () => {
           </div>
         </div>
 
-        {/* Admin edit button */}
         {isAdmin && (
           <div className="admin-actions">
             <button
               onClick={handleEditEvent}
               className="edit-tournament-button"
+              type="button"
             >
               Edit Tournament
             </button>
@@ -294,18 +361,22 @@ const PickleballPage = () => {
 
       {/* Main Content */}
       <div className="pickleball-content">
-        {/* Main Description */}
+        {/* Description */}
         <div className="pickleball-description">
           <p>{eventData.description}</p>
         </div>
 
-        {/* Tournament Sections */}
+        {/* Tournament Sections/Divisions */}
         <div className="pickleball-sections">
           <div className="sections-header">
             <h2>Divisions</h2>
 
             {isAdmin && (
-              <button className="add-section-button" onClick={handleAddSection}>
+              <button
+                className="add-section-button"
+                onClick={handleAddSection}
+                type="button"
+              >
                 Add Division
               </button>
             )}
@@ -328,6 +399,7 @@ const PickleballPage = () => {
                       <button
                         className="edit-section-button"
                         onClick={() => handleEditSection(section, index)}
+                        type="button"
                       >
                         Edit
                       </button>
@@ -348,7 +420,7 @@ const PickleballPage = () => {
                         <span>
                           {formatDateTime(
                             section.tournamentDate || section.startDate,
-                            section.tournamentTime
+                            section.tournamentTime,
                           )}
                         </span>
                       </div>
@@ -395,42 +467,86 @@ const PickleballPage = () => {
           )}
         </div>
 
-        {/* Image Gallery */}
-        {eventData.imageGallery && eventData.imageGallery.length > 0 && (
+        {/* Image Gallery Hero Slider - MOVED BELOW DIVISIONS */}
+        {hasImages && (
           <div className="pickleball-gallery">
             <h2>Event Gallery</h2>
-            <div className="gallery-container">
-              <div className="main-image-container">
+            <div className="gallery-hero-container">
+              <div className="hero-image-wrapper">
                 <img
                   src={getImageUrl(
-                    eventData.imageGallery[mainImageIndex].imageUrl
+                    eventData.imageGallery[mainImageIndex].imageUrl,
                   )}
-                  alt={eventData.imageGallery[mainImageIndex].name}
-                  className="main-gallery-image"
+                  alt={
+                    eventData.imageGallery[mainImageIndex].name ||
+                    `Event image ${mainImageIndex + 1}`
+                  }
+                  className="hero-gallery-image"
                   onError={handleImageError}
                 />
               </div>
 
               {eventData.imageGallery.length > 1 && (
-                <div className="image-thumbnails">
-                  {eventData.imageGallery.map((image, index) => (
-                    <div
-                      key={image._id || index}
-                      className={`thumbnail ${
-                        index === mainImageIndex ? "active" : ""
-                      }`}
-                      onClick={() => handleThumbnailClick(index)}
-                    >
-                      <img
-                        src={getImageUrl(image.imageUrl)}
-                        alt={image.name}
-                        onError={handleImageError}
-                      />
-                    </div>
-                  ))}
-                </div>
+                <>
+                  <button
+                    className="gallery-nav-button prev"
+                    onClick={handlePrevImage}
+                    aria-label="Previous image"
+                    type="button"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    className="gallery-nav-button next"
+                    onClick={handleNextImage}
+                    aria-label="Next image"
+                    type="button"
+                  >
+                    ›
+                  </button>
+                </>
               )}
             </div>
+
+            {eventData.imageGallery.length > 1 && (
+              <div className="gallery-indicators">
+                {eventData.imageGallery.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`gallery-indicator ${
+                      index === mainImageIndex ? "active" : ""
+                    }`}
+                    onClick={() => setMainImageIndex(index)}
+                    aria-label={`Go to image ${index + 1}`}
+                    type="button"
+                  />
+                ))}
+              </div>
+            )}
+
+            {isAdmin && (
+              <button
+                className="edit-gallery-button"
+                onClick={() => setIsGalleryDialogOpen(true)}
+                type="button"
+              >
+                Edit Gallery
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Show Edit Gallery button even if no images yet (for admin) */}
+        {isAdmin && !hasImages && (
+          <div className="pickleball-gallery">
+            <h2>Event Gallery</h2>
+            <button
+              className="edit-gallery-button"
+              onClick={() => setIsGalleryDialogOpen(true)}
+              type="button"
+            >
+              Add Images to Gallery
+            </button>
           </div>
         )}
       </div>
@@ -438,7 +554,7 @@ const PickleballPage = () => {
       {/* Back Button */}
       <div className="back-navigation">
         <Link to="/events" className="back-button">
-          <i className="fas fa-arrow-left"></i> Back to Events
+          Back to Events
         </Link>
       </div>
 
@@ -461,6 +577,16 @@ const PickleballPage = () => {
           onSave={handleSaveSection}
           onDelete={handleDeleteSection}
           isSaving={isSaving}
+        />
+      )}
+
+      {isGalleryDialogOpen && (
+        <GalleryEditDialog
+          isOpen={isGalleryDialogOpen}
+          onClose={() => setIsGalleryDialogOpen(false)}
+          eventSlug={eventData.titleSlug}
+          images={eventData.imageGallery || []}
+          onImagesUpdated={handleGalleryUpdated}
         />
       )}
     </div>
