@@ -1,0 +1,191 @@
+/* src/pages/styles/ContactPage.css */
+
+.contact-page-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+/* ── Section heading row ── */
+.contact-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.contact-heading-row h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--primary-color, #1976d2);
+}
+
+.contact-edit-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid #bbb;
+  color: #555;
+  padding: 0.3rem 0.9rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.contact-edit-btn:hover {
+  background: #e8e8e8;
+  color: #222;
+  border-color: #999;
+}
+
+/* ── Contact section ── */
+.contact-page-section {
+  margin-bottom: 2rem;
+}
+
+.no-organizers {
+  color: #888;
+  font-style: italic;
+}
+
+/* ── Organizer cards grid ── */
+.organizers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.organizer-card {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 1.75rem 1.5rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.organizer-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Admin edit button — top-right of card */
+.organizer-edit-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: none;
+  border: 1px solid #ccc;
+  color: #666;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1.4;
+}
+
+.organizer-edit-btn:hover {
+  background: #f0f0f0;
+  color: #222;
+}
+
+/* Avatar circle */
+.organizer-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary-color, #1976d2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 auto 0.9rem;
+}
+
+.organizer-name {
+  margin: 0 0 0.3rem;
+  font-size: 1.1rem;
+  color: #222;
+}
+
+.organizer-role {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: #777;
+  font-style: italic;
+}
+
+/* Contact links */
+.organizer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.organizer-contact-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  color: var(--primary-color, #1976d2);
+  text-decoration: none;
+  word-break: break-all;
+  transition: color 0.15s;
+}
+
+.organizer-contact-item:hover {
+  color: #1565c0;
+  text-decoration: underline;
+}
+
+.contact-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* ── Empty / hint text ── */
+.empty-hint {
+  color: #888;
+  font-style: italic;
+}
+
+.inline-link-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color, #1976d2);
+  cursor: pointer;
+  font-size: inherit;
+  font-style: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.inline-link-btn:hover {
+  color: #1565c0;
+}
+
+/* ── Loading ── */
+.loading-message {
+  text-align: center;
+  color: #888;
+  padding: 2rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .contact-heading-row h1 {
+    font-size: 1.6rem;
+  }
+
+  .organizers-grid {
+    grid-template-columns: 1fr;
+  }
+}

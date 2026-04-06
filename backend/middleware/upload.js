@@ -2,41 +2,65 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const slugify = require("slugify");
 
-// Define storage destination
+// Define storage destinations
 const imagesDir = path.join(__dirname, "../images");
+const eventsDir = path.join(imagesDir, "events");
+const pickleballDir = path.join(eventsDir, "pickleball");
+const homepageDir = path.join(imagesDir, "homepage");
 
-// Create images directory if it doesn't exist
-if (!fs.existsSync(imagesDir)) {
-  fs.mkdirSync(imagesDir, { recursive: true });
-  console.log(`Created images directory at: ${imagesDir}`);
-}
+// Create directories if they don't exist
+[imagesDir, eventsDir, pickleballDir, homepageDir].forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`Created directory at: ${dir}`);
+  }
+});
 
 // Configure diskStorage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Store all images in the main images directory
-    cb(null, imagesDir);
+    // Get event slug from params or request body
+    const eventSlug = req.params.slug || req.body.eventSlug;
+
+    // Determine destination based on event slug
+    let destination = imagesDir;
+
+    if (eventSlug === "pickleball-tournament") {
+      destination = pickleballDir;
+    } else if (eventSlug === "homepage") {
+      destination = homepageDir;
+    } else if (eventSlug) {
+      // For other events, create a directory under events/
+      const eventDir = path.join(eventsDir, eventSlug);
+      if (!fs.existsSync(eventDir)) {
+        fs.mkdirSync(eventDir, { recursive: true });
+        console.log(`Created directory at: ${eventDir}`);
+      }
+      destination = eventDir;
+    }
+
+    cb(null, destination);
   },
   filename: function (req, file, cb) {
     // Get event slug from params or request body
     const eventSlug = req.params.slug || req.body.eventSlug;
 
-    // Create a slugified version of the original filename (without extension)
-    let originalName = path.parse(file.originalname).name;
-    originalName = slugify(originalName, {
-      lower: true,
-      strict: true,
-      remove: /[*+~.()'"!:@]/g,
-    });
-
     // Get file extension
     const ext = path.extname(file.originalname);
 
-    // Create a filename with pattern: events_eventslug_imagename_timestamp.ext
+    // Create a filename with pattern based on event
     const timestamp = Date.now();
-    const filename = `events_${eventSlug}_${originalName}_${timestamp}${ext}`;
+    const randomNum = Math.floor(Math.random() * 1000000);
+
+    let filename;
+    if (eventSlug === "pickleball-tournament") {
+      // For pickleball: pickleball-{random}.ext
+      filename = `pickleball-${randomNum}${ext}`;
+    } else {
+      // For other events: eventslug-{random}.ext
+      filename = `${eventSlug}-${randomNum}${ext}`;
+    }
 
     console.log(`Generated filename: ${filename}`);
     cb(null, filename);

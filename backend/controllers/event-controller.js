@@ -98,7 +98,7 @@ exports.updateEventBySlug = async (req, res, next) => {
       console.log(
         "Image gallery in update request:",
         req.body.imageGallery.length,
-        "images"
+        "images",
       );
     }
 
@@ -146,7 +146,7 @@ exports.updateEventBySlug = async (req, res, next) => {
               // Make sure slug is set too
               slug: slugify(sectionData.title, { lower: true, trim: true }),
             },
-            { new: true }
+            { new: true },
           );
 
           sectionIds.push(sectionData._id);
@@ -178,7 +178,7 @@ exports.updateEventBySlug = async (req, res, next) => {
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     res.status(200).json({
@@ -277,9 +277,13 @@ exports.uploadEventImage = async (req, res, next) => {
     // Create image info object
     const imageName = req.body.name || "Event Image";
 
-    // IMPORTANT: Store only the path relative to the images directory
-    // This makes the paths consistent and portable
-    const imagePath = `/images/${req.file.filename}`;
+    // Determine the relative path based on event slug
+    let imagePath;
+    if (slug === "pickleball-tournament") {
+      imagePath = `/images/events/pickleball/${req.file.filename}`;
+    } else {
+      imagePath = `/images/events/${slug}/${req.file.filename}`;
+    }
 
     console.log("Creating image entry with path:", imagePath);
 
@@ -298,7 +302,7 @@ exports.uploadEventImage = async (req, res, next) => {
 
     console.log(
       "Image added to event, new gallery size:",
-      event.imageGallery.length
+      event.imageGallery.length,
     );
 
     // Return the created image with its MongoDB _id for future reference
@@ -338,7 +342,7 @@ exports.getEventImages = async (req, res, next) => {
 
     console.log(
       "Found event, image gallery size:",
-      event.imageGallery ? event.imageGallery.length : 0
+      event.imageGallery ? event.imageGallery.length : 0,
     );
 
     res.status(200).json({
@@ -381,7 +385,7 @@ exports.deleteEventImage = async (req, res, next) => {
 
     // Find the image with the specific ID
     const imageIndex = event.imageGallery.findIndex(
-      (img) => img._id.toString() === imageId
+      (img) => img._id.toString() === imageId,
     );
 
     console.log("Image index:", imageIndex);
@@ -424,7 +428,7 @@ exports.deleteEventImage = async (req, res, next) => {
 
     console.log(
       "Image removed from event, new gallery size:",
-      event.imageGallery.length
+      event.imageGallery.length,
     );
 
     res.status(200).json({
@@ -485,11 +489,19 @@ exports.updateEventSection = async (req, res, next) => {
   try {
     const sectionId = req.params.sectionId;
 
+    console.log("Updating section:", sectionId);
+    console.log("Section update data:", req.body);
+
     // Explicitly set slug if title is changed
     if (req.body.title) {
-      req.body.slug = slugify(req.body.title, { lower: true, trim: true });
+      req.body.slug = slugify(req.body.title, {
+        lower: true,
+        strict: true,
+        remove: /[*+~.()'"!:@]/g, // Remove quotes and special characters
+      });
     }
 
+    // Update the section with all fields from req.body
     const section = await EventSection.findByIdAndUpdate(sectionId, req.body, {
       new: true,
       runValidators: true,
@@ -502,12 +514,14 @@ exports.updateEventSection = async (req, res, next) => {
       });
     }
 
+    console.log("Section updated successfully:", section);
+
     res.status(200).json({
       success: true,
       data: section,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error updating section:", err);
     res.status(500).json({
       success: false,
       message: err.message,

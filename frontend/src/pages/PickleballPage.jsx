@@ -170,73 +170,31 @@ const PickleballPage = () => {
     );
   };
 
-  // Format dates display
+  // Format dates display - Updated for single date range
   const formatDatesDisplay = (eventDates, startDate, endDate) => {
-    // Use eventDates if available, otherwise fall back to legacy startDate/endDate
-    let dates = [];
+    // Use startDate and endDate directly (no more eventDates array)
+    if (!startDate || !endDate) return "Dates TBD";
 
-    if (eventDates && eventDates.length > 0) {
-      dates = eventDates;
-    } else if (startDate && endDate) {
-      dates = [{ startDate, endDate }];
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const formatDate = (date) => {
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      });
+    };
+
+    // Same day
+    if (start.toISOString().split("T")[0] === end.toISOString().split("T")[0]) {
+      return formatDate(start);
     }
 
-    if (dates.length === 0) return "Dates TBD";
-
-    // Sort dates chronologically
-    const sortedDates = [...dates].sort(
-      (a, b) => new Date(a.startDate) - new Date(b.startDate),
-    );
-
-    // Format each date range
-    const formattedRanges = sortedDates.map((dateRange) => {
-      const start = new Date(dateRange.startDate);
-      const end = new Date(dateRange.endDate);
-
-      // Format dates
-      const startDay = start.getUTCDate();
-      const endDay = end.getUTCDate();
-      const startMonth = start.toLocaleDateString("en-US", {
-        month: "long",
-        timeZone: "UTC",
-      });
-      const endMonth = end.toLocaleDateString("en-US", {
-        month: "long",
-        timeZone: "UTC",
-      });
-      const startYear = start.getUTCFullYear();
-      const endYear = end.getUTCFullYear();
-
-      // Get ordinal suffix
-      const getOrdinal = (n) => {
-        const s = ["th", "st", "nd", "rd"];
-        const v = n % 100;
-        return n + (s[(v - 20) % 10] || s[v] || s[0]);
-      };
-
-      // Same day
-      if (
-        start.toISOString().split("T")[0] === end.toISOString().split("T")[0]
-      ) {
-        return `${startMonth} ${getOrdinal(startDay)}, ${startYear}`;
-      }
-
-      // Same month and year
-      if (startMonth === endMonth && startYear === endYear) {
-        return `${startMonth} ${getOrdinal(startDay)}-${getOrdinal(endDay)}, ${startYear}`;
-      }
-
-      // Same year, different months
-      if (startYear === endYear) {
-        return `${startMonth} ${getOrdinal(startDay)} - ${endMonth} ${getOrdinal(endDay)}, ${startYear}`;
-      }
-
-      // Different years
-      return `${startMonth} ${getOrdinal(startDay)}, ${startYear} - ${endMonth} ${getOrdinal(endDay)}, ${endYear}`;
-    });
-
-    // Join multiple ranges with commas
-    return formattedRanges.join(", ");
+    // Date range
+    return `${formatDate(start)} - ${formatDate(end)}`;
   };
 
   // Helper function to format date and time for sections
@@ -390,10 +348,17 @@ const PickleballPage = () => {
             </div>
           ) : (
             <div className="sections-list">
-              {eventData.sections.map((section, index) => (
+              {eventData.sections
+                .filter((section) => isAdmin || section.isPublished !== false)
+                .map((section, index) => (
                 <div className="section-card" key={section._id || index}>
                   <div className="section-header">
-                    <h3>{section.title}</h3>
+                    <div className="section-title-row">
+                      <h3>{section.title}</h3>
+                      {isAdmin && section.isPublished === false && (
+                        <span className="unpublished-badge">Unpublished</span>
+                      )}
+                    </div>
 
                     {isAdmin && (
                       <button
@@ -444,10 +409,14 @@ const PickleballPage = () => {
                         </span>
                       </div>
 
-                      {section.price && (
+                      {(section.price || eventData.pricePerTeam) && (
                         <div className="info-item">
                           <span className="info-label">Price:</span>
-                          <span>${section.price}</span>
+                          <span>
+                            {section.price
+                              ? `$${section.price}`
+                              : eventData.pricePerTeam}
+                          </span>
                         </div>
                       )}
                     </div>

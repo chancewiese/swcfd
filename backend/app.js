@@ -18,6 +18,8 @@ const authRoutes = require("./routers/auth-router");
 const userRoutes = require("./routers/user-router");
 const familyRoutes = require("./routers/family-router");
 const eventRoutes = require("./routers/event-router");
+const siteSettingsRoutes = require("./routers/site-settings-router");
+const sponsorRoutes = require("./routers/sponsor-router");
 
 // Initialize Express app
 const app = express();
@@ -58,6 +60,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/families", familyRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/site", siteSettingsRoutes);
+app.use("/api/sponsors", sponsorRoutes);
 
 // Add a simple test route
 app.get("/test", (req, res) => {

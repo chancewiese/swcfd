@@ -1,63 +1,44 @@
-// src/components/events/pickleball/GalleryEditDialog.jsx
+// src/components/home/HeroGalleryEditDialog.jsx
 import { useState, useEffect } from "react";
-import axios from "axios";
-import "./PickleballDialog.css";
 import UndoIcon from "@mui/icons-material/Undo";
-import { getImageUrl } from "../../../utils/imageUtils";
+import { getImageUrl } from "../../utils/imageUtils";
+import useSiteSettings from "../../hooks/useSiteSettings";
+import "../../components/events/pickleball/PickleballDialog.css";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-
-const GalleryEditDialog = ({
-  isOpen,
-  onClose,
-  eventSlug,
-  images,
-  onImagesUpdated,
-}) => {
+const HeroGalleryEditDialog = ({ isOpen, onClose, images, onImagesUpdated }) => {
+  const { uploadHeroImage, deleteHeroImage } = useSiteSettings();
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-
-  // Track which images are marked for deletion (by ID)
+  const [error, setError] = useState("");
   const [markedForDeletion, setMarkedForDeletion] = useState(new Set());
 
-  // Handle ESC key to close dialog
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && isOpen && !saving && !uploading) {
         handleClose();
       }
     };
-
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
       return () => document.removeEventListener("keydown", handleEscape);
     }
   }, [isOpen, saving, uploading]);
 
-  // Auto-upload when file is selected
   const handleFileChange = async (e) => {
     setError("");
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
 
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         setError("Please select an image file");
         return;
       }
-
-      // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         setError("Image file must be less than 5MB");
         return;
       }
 
-      // Auto-upload immediately
       await handleUpload(file);
-
-      // Reset the file input so the same file can be selected again if needed
       e.target.value = "";
     }
   };
@@ -65,38 +46,14 @@ const GalleryEditDialog = ({
   const handleUpload = async (file) => {
     setUploading(true);
     setError("");
-
     try {
-      // Generate auto-name: pickleball-{random}
-      const randomNum = Math.floor(Math.random() * 1000000);
-      const imageName = `pickleball-${randomNum}`;
-
       const formData = new FormData();
       formData.append("image", file);
-      formData.append("name", imageName);
-      formData.append("eventSlug", eventSlug);
-
-      console.log(
-        "Uploading image to:",
-        `${API_BASE_URL}/events/${eventSlug}/images/upload`,
-      );
-
-      const response = await axios.post(
-        `${API_BASE_URL}/events/${eventSlug}/images/upload`,
-        formData,
-        {
-          withCredentials: true,
-        },
-      );
-
-      console.log("Upload response:", response.data);
-
-      if (response.data && response.data.success) {
-        // Refresh the gallery immediately
+      const response = await uploadHeroImage(formData);
+      if (response && response.success) {
         onImagesUpdated();
       }
     } catch (err) {
-      console.error("Upload error:", err);
       setError(err.response?.data?.message || "Failed to upload image");
     } finally {
       setUploading(false);
@@ -106,10 +63,8 @@ const GalleryEditDialog = ({
   const handleMarkForDeletion = (imageId) => {
     const newMarked = new Set(markedForDeletion);
     if (newMarked.has(imageId)) {
-      // Already marked, unmark it (undo)
       newMarked.delete(imageId);
     } else {
-      // Mark for deletion
       newMarked.add(imageId);
     }
     setMarkedForDeletion(newMarked);
@@ -117,37 +72,25 @@ const GalleryEditDialog = ({
 
   const handleSave = async () => {
     if (markedForDeletion.size === 0) {
-      // Nothing to delete, just close and redirect
       handleClose();
-      // Redirect is handled by onClose in parent component
       return;
     }
 
     setSaving(true);
     setError("");
-
     try {
-      // Delete all marked images
-      const deletePromises = Array.from(markedForDeletion).map((imageId) =>
-        axios.delete(`${API_BASE_URL}/events/${eventSlug}/images/${imageId}`, {
-          withCredentials: true,
-        }),
+      await Promise.all(
+        Array.from(markedForDeletion).map((imageId) => deleteHeroImage(imageId)),
       );
-
-      await Promise.all(deletePromises);
-
-      // Success - close and refresh
       handleClose();
       onImagesUpdated();
     } catch (err) {
-      console.error("Delete error:", err);
       setError(err.response?.data?.message || "Failed to delete some images");
       setSaving(false);
     }
   };
 
   const handleClose = () => {
-    // Reset all state
     setError("");
     setMarkedForDeletion(new Set());
     onClose();
@@ -161,28 +104,28 @@ const GalleryEditDialog = ({
         className="pickleball-dialog-content gallery-dialog-content"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2>Manage Image Gallery</h2>
+        <h2>Manage Hero Slider Images</h2>
 
         {error && <div className="dialog-error">{error}</div>}
 
-        {/* Upload Section */}
         <div className="gallery-upload-section">
           <h3>Upload New Image</h3>
+          <p style={{ fontSize: "0.85rem", color: "#666", marginBottom: "0.75rem" }}>
+            Images display best at a wide aspect ratio (e.g. 1920×800 or 16:5).
+          </p>
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
             disabled={uploading || saving}
             className="gallery-file-input"
-            id="gallery-file-upload"
+            id="hero-file-upload"
           />
-          <label htmlFor="gallery-file-upload">
+          <label htmlFor="hero-file-upload">
             <button
               type="button"
               className="gallery-upload-button"
-              onClick={() =>
-                document.getElementById("gallery-file-upload").click()
-              }
+              onClick={() => document.getElementById("hero-file-upload").click()}
               disabled={uploading || saving}
             >
               {uploading ? "Uploading..." : "Select Image"}
@@ -190,7 +133,6 @@ const GalleryEditDialog = ({
           </label>
         </div>
 
-        {/* Existing Images Gallery */}
         {images && images.length > 0 ? (
           <>
             <h3>Current Images</h3>
@@ -234,7 +176,6 @@ const GalleryEditDialog = ({
                 );
               })}
             </div>
-
             {markedForDeletion.size > 0 && (
               <div className="deletion-notice">
                 {markedForDeletion.size} image
@@ -245,11 +186,10 @@ const GalleryEditDialog = ({
           </>
         ) : (
           <div className="gallery-empty-state">
-            No images in gallery. Upload images using the button above.
+            No images yet. Upload images using the button above.
           </div>
         )}
 
-        {/* Dialog Actions */}
         <div className="dialog-actions">
           <button
             type="button"
@@ -273,4 +213,4 @@ const GalleryEditDialog = ({
   );
 };
 
-export default GalleryEditDialog;
+export default HeroGalleryEditDialog;

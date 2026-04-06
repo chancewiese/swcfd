@@ -8,6 +8,9 @@ import EventsPage from "./pages/EventsPage";
 import EventPage from "./pages/EventPage";
 import EditEventPage from "./pages/EditEventPage";
 import AccountPage from "./pages/AccountPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import SponsorsPage from "./pages/SponsorsPage";
 
 // Import dedicated event pages
 import PickleballPage from "./pages/PickleballPage";
@@ -127,7 +130,7 @@ const Router = () => {
         path="/sponsors"
         element={
           <Layout>
-            <PlaceholderPage title="Sponsors" />
+            <SponsorsPage />
           </Layout>
         }
       />
@@ -135,7 +138,7 @@ const Router = () => {
         path="/about"
         element={
           <Layout>
-            <PlaceholderPage title="About Us" />
+            <AboutPage />
           </Layout>
         }
       />
@@ -143,7 +146,7 @@ const Router = () => {
         path="/contact"
         element={
           <Layout>
-            <PlaceholderPage title="Contact Us" />
+            <ContactPage />
           </Layout>
         }
       />

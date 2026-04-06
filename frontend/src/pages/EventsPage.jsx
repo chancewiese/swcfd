@@ -1,7 +1,6 @@
 // src/pages/EventsPage.jsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { format } from "date-fns";
 import useEvents from "../hooks/useEvents";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -37,25 +36,45 @@ function EventsPage() {
     fetchEvents();
   }, [getEvents]);
 
-  // Format date for display
+  // Format date for display - FIXED to use UTC to avoid timezone issues
   const formatEventDate = (startDate, endDate) => {
     if (!startDate || !endDate) return "Date not set";
 
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    if (start.toDateString() === end.toDateString()) {
-      return format(start, "MMMM d, yyyy");
+    // Helper to format date in UTC
+    const formatUTCDate = (date) => {
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      });
+    };
+
+    // Check if same day using UTC
+    if (start.toISOString().split("T")[0] === end.toISOString().split("T")[0]) {
+      return formatUTCDate(start);
     }
 
-    if (
-      start.getMonth() === end.getMonth() &&
-      start.getFullYear() === end.getFullYear()
-    ) {
-      return `${format(start, "MMMM d")}-${format(end, "d, yyyy")}`;
+    // Check if same month and year using UTC
+    const startMonth = start.getUTCMonth();
+    const startYear = start.getUTCFullYear();
+    const endMonth = end.getUTCMonth();
+    const endYear = end.getUTCFullYear();
+
+    if (startMonth === endMonth && startYear === endYear) {
+      const startDay = start.getUTCDate();
+      const endDay = end.getUTCDate();
+      const monthName = start.toLocaleDateString("en-US", {
+        month: "long",
+        timeZone: "UTC",
+      });
+      return `${monthName} ${startDay}-${endDay}, ${startYear}`;
     }
 
-    return `${format(start, "MMMM d, yyyy")} - ${format(end, "MMMM d, yyyy")}`;
+    return `${formatUTCDate(start)} - ${formatUTCDate(end)}`;
   };
 
   // Filter events - if user is admin, show all; otherwise, show only published
