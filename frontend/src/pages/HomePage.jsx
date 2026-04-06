@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLayout } from "../context/LayoutContext";
 import useSiteSettings from "../hooks/useSiteSettings";
 import HeroGalleryEditDialog from "../components/home/HeroGalleryEditDialog";
 import { getImageUrl } from "../utils/imageUtils";
@@ -11,6 +12,7 @@ const SLIDE_INTERVAL = 5000;
 
 function HomePage() {
   const { isAuthenticated, hasRole } = useAuth();
+  const { setHasHero, setHeroScrollThreshold } = useLayout();
   const { getHeroImages } = useSiteSettings();
 
   const [heroImages, setHeroImages] = useState([]);
@@ -21,6 +23,26 @@ function HomePage() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   const intervalRef = useRef(null);
+  const heroRef = useRef(null);
+
+  // Signal that this page has a hero at the top
+  useEffect(() => {
+    setHasHero(true);
+    return () => setHasHero(false);
+  }, [setHasHero]);
+
+  // Keep scroll threshold in sync with rendered hero height
+  useEffect(() => {
+    if (!heroRef.current) return;
+    const updateThreshold = () => {
+      if (heroRef.current) {
+        setHeroScrollThreshold(heroRef.current.offsetHeight);
+      }
+    };
+    updateThreshold();
+    window.addEventListener("resize", updateThreshold);
+    return () => window.removeEventListener("resize", updateThreshold);
+  }, [heroImages, setHeroScrollThreshold]);
 
   useEffect(() => {
     if (isAuthenticated && hasRole) {
@@ -76,8 +98,9 @@ function HomePage() {
 
   return (
     <div className="home-container">
-      {/* Hero Slider — full-width breakout */}
+      {/* Hero Slider — full-width, starts at top of viewport behind fixed header */}
       <div
+        ref={heroRef}
         className="hero-slider-wrapper"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}

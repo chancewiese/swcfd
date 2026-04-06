@@ -4,7 +4,7 @@ import "./Header.css";
 import { IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 
-function Header({ toggleSidebar, isAuthenticated, user }) {
+function Header({ toggleSidebar, isAuthenticated, user, transparent }) {
   const navigate = useNavigate();
 
   const handleAccountClick = () => {
@@ -12,7 +12,7 @@ function Header({ toggleSidebar, isAuthenticated, user }) {
   };
 
   return (
-    <header className="header">
+    <header className={`header${transparent ? " header--transparent" : ""}`}>
       <div className="header-container">
         <div className="header-left">
           <IconButton

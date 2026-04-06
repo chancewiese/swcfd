@@ -41,6 +41,7 @@ const sponsorUpload = multer({
 // Tier routes
 router.get("/tiers", sponsorController.getAllTiers);
 router.post("/tiers", sponsorController.createTier);
+router.put("/tiers/reorder", sponsorController.reorderTiers);
 router.put("/tiers/:tierId", sponsorController.updateTier);
 router.delete("/tiers/:tierId", sponsorController.deleteTier);
 

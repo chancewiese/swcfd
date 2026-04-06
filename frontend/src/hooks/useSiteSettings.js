@@ -109,6 +109,39 @@ const useSiteSettings = () => {
     return response.data;
   }, []);
 
+  const getGalleryPhotos = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${API_BASE_URL}/site/gallery`, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to load gallery");
+      return { success: false, data: [] };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const uploadGalleryPhoto = useCallback(async (formData) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/site/gallery/upload`,
+      formData,
+      { withCredentials: true },
+    );
+    return response.data;
+  }, []);
+
+  const deleteGalleryPhoto = useCallback(async (photoId) => {
+    const response = await axios.delete(
+      `${API_BASE_URL}/site/gallery/${photoId}`,
+      { withCredentials: true },
+    );
+    return response.data;
+  }, []);
+
   return {
     loading,
     error,
@@ -121,6 +154,9 @@ const useSiteSettings = () => {
     addOrganizer,
     updateOrganizer,
     deleteOrganizer,
+    getGalleryPhotos,
+    uploadGalleryPhoto,
+    deleteGalleryPhoto,
   };
 };
 

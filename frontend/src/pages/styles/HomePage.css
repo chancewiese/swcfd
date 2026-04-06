@@ -6,16 +6,15 @@
   flex-direction: column;
 }
 
-/* ── Full-width breakout trick ── */
-/* .main-content has max-width:1200px + padding:1rem + margin:auto.
-   We escape that with left:50% + translateX(-50%) + width:100vw       */
+/* ── Full-width breakout: hero escapes the constrained main-content ── */
+/* main-content has max-width:1200px + side padding + margin:auto.
+   We escape with left:50% + translateX(-50%) + width:100vw.
+   No margin-top needed — layout--has-hero already removes top padding. */
 .hero-slider-wrapper {
   position: relative;
   width: 100vw;
   left: 50%;
   transform: translateX(-50%);
-  /* pull up into the top padding of main-content */
-  margin-top: -1rem;
 }
 
 /* ── Hero slide ── */
@@ -53,6 +52,7 @@
 }
 
 /* ── Hero text content ── */
+/* padding-top shifts the flex-center point down to clear the fixed header */
 .hero-content {
   position: absolute;
   inset: 0;
@@ -62,6 +62,7 @@
   justify-content: center;
   text-align: center;
   padding: 2rem;
+  padding-top: calc(var(--header-height, 64px) + 2rem);
   z-index: 2;
 }
 
@@ -175,7 +176,6 @@
   padding: 0.6rem 0 0.25rem;
   background: #f5f5f5;
   border-bottom: 1px solid #e0e0e0;
-  /* also needs to break out full-width */
   width: 100vw;
   position: relative;
   left: 50%;

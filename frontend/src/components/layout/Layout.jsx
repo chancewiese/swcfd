@@ -1,45 +1,64 @@
 // src/components/layout/Layout.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import SidebarNav from "./SidebarNav";
+import { LayoutContext } from "../../context/LayoutContext";
 import "./Layout.css";
 
 function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  // Get authentication state from context
   const { isAuthenticated, user, logout } = useAuth();
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  // Hero / header transparency state
+  const [hasHero, setHasHero] = useState(false);
+  const [heroScrollThreshold, setHeroScrollThreshold] = useState(400);
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
 
-  const closeSidebar = () => {
-    setSidebarOpen(false);
-  };
+  // Scroll listener — updates whenever threshold changes
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolledPastHero(window.scrollY > heroScrollThreshold);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Check immediately in case page is already scrolled
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [heroScrollThreshold]);
 
-  // Handle user logout
-  const handleLogout = async () => {
-    await logout();
-  };
+  // Reset when leaving a hero page
+  useEffect(() => {
+    if (!hasHero) {
+      setScrolledPastHero(false);
+    }
+  }, [hasHero]);
+
+  const toggleSidebar = () => setSidebarOpen((s) => !s);
+  const closeSidebar = () => setSidebarOpen(false);
+  const handleLogout = async () => { await logout(); };
+
+  const headerTransparent = hasHero && !scrolledPastHero;
 
   return (
-    <div className="layout">
-      <Header
-        toggleSidebar={toggleSidebar}
-        isAuthenticated={isAuthenticated}
-        user={user}
-        onLogout={handleLogout}
-      />
-      <SidebarNav
-        isOpen={sidebarOpen}
-        closeSidebar={closeSidebar}
-        isAuthenticated={isAuthenticated}
-      />
-      <main className="main-content">{children}</main>
-      <Footer />
-    </div>
+    <LayoutContext.Provider value={{ hasHero, setHasHero, setHeroScrollThreshold }}>
+      <div className={`layout${hasHero ? " layout--has-hero" : ""}`}>
+        <Header
+          toggleSidebar={toggleSidebar}
+          isAuthenticated={isAuthenticated}
+          user={user}
+          onLogout={handleLogout}
+          transparent={headerTransparent}
+        />
+        <SidebarNav
+          isOpen={sidebarOpen}
+          closeSidebar={closeSidebar}
+          isAuthenticated={isAuthenticated}
+        />
+        <main className="main-content">{children}</main>
+        <Footer />
+      </div>
+    </LayoutContext.Provider>
   );
 }
 

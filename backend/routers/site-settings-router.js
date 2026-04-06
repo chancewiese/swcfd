@@ -33,4 +33,17 @@ router.post("/organizers", siteSettingsController.addOrganizer);
 router.put("/organizers/:organizerId", siteSettingsController.updateOrganizer);
 router.delete("/organizers/:organizerId", siteSettingsController.deleteOrganizer);
 
+// Photo gallery
+router.get("/gallery", siteSettingsController.getGalleryPhotos);
+router.post(
+  "/gallery/upload",
+  (req, res, next) => {
+    req.params.slug = "gallery";
+    next();
+  },
+  upload.single("image"),
+  siteSettingsController.uploadGalleryPhoto,
+);
+router.delete("/gallery/:photoId", siteSettingsController.deleteGalleryPhoto);
+
 module.exports = router;

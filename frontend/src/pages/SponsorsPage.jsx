@@ -14,6 +14,7 @@ function SponsorsPage() {
     createTier,
     updateTier,
     deleteTier,
+    reorderTiers,
     addSponsor,
     updateSponsor,
     deleteSponsor,
@@ -25,11 +26,25 @@ function SponsorsPage() {
   const [tiers, setTiers] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Admin tier/sponsor dialogs
   const [isTierDialogOpen, setIsTierDialogOpen] = useState(false);
   const [isSponsorDialogOpen, setIsSponsorDialogOpen] = useState(false);
   const [currentTier, setCurrentTier] = useState(null);
   const [currentSponsor, setCurrentSponsor] = useState(null);
   const [currentTierForSponsor, setCurrentTierForSponsor] = useState(null);
+
+  // Edit Tiers manager modal
+  const [isEditTiersOpen, setIsEditTiersOpen] = useState(false);
+  const [localTiers, setLocalTiers] = useState([]);
+  const [dragIdx, setDragIdx] = useState(null);
+  const [orderChanged, setOrderChanged] = useState(false);
+  // Tracks whether Edit Tiers should reopen after TierDialog closes
+  const [reopenEditTiers, setReopenEditTiers] = useState(false);
+
+  // Public modals
+  const [isTierListModalOpen, setIsTierListModalOpen] = useState(false);
+  const [isBecomeASponsorModalOpen, setIsBecomeASponsorModalOpen] =
+    useState(false);
 
   useEffect(() => {
     if (isAuthenticated && hasRole) {
@@ -48,15 +63,41 @@ function SponsorsPage() {
     fetchTiers();
   }, [fetchTiers]);
 
-  // Tier dialog handlers
-  const openAddTier = () => {
-    setCurrentTier(null);
-    setIsTierDialogOpen(true);
-  };
+  // Keep localTiers in sync whenever the canonical tiers list changes
+  useEffect(() => {
+    setLocalTiers(tiers);
+    setOrderChanged(false);
+  }, [tiers]);
 
+  // ── Tier dialog handlers ──────────────────────────────────────────────────
+
+  // Open from the main page (no need to reopen Edit Tiers modal)
   const openEditTier = (tier) => {
     setCurrentTier(tier);
     setIsTierDialogOpen(true);
+  };
+
+  // Open from within the Edit Tiers manager modal
+  const openTierDialogFromManager = (tier) => {
+    setCurrentTier(tier);
+    setIsEditTiersOpen(false);
+    setReopenEditTiers(true);
+    setIsTierDialogOpen(true);
+  };
+
+  const openAddTierFromManager = () => {
+    setCurrentTier(null);
+    setIsEditTiersOpen(false);
+    setReopenEditTiers(true);
+    setIsTierDialogOpen(true);
+  };
+
+  const handleTierDialogClose = () => {
+    setIsTierDialogOpen(false);
+    if (reopenEditTiers) {
+      setReopenEditTiers(false);
+      setIsEditTiersOpen(true);
+    }
   };
 
   const handleSaveTier = async (formData) => {
@@ -68,7 +109,7 @@ function SponsorsPage() {
         await createTier(formData);
       }
       await fetchTiers();
-      setIsTierDialogOpen(false);
+      handleTierDialogClose();
     } catch (err) {
       console.error("Failed to save tier:", err);
     } finally {
@@ -81,7 +122,7 @@ function SponsorsPage() {
     try {
       await deleteTier(tierId);
       await fetchTiers();
-      setIsTierDialogOpen(false);
+      handleTierDialogClose();
     } catch (err) {
       console.error("Failed to delete tier:", err);
     } finally {
@@ -89,7 +130,8 @@ function SponsorsPage() {
     }
   };
 
-  // Sponsor dialog handlers
+  // ── Sponsor dialog handlers ───────────────────────────────────────────────
+
   const openAddSponsor = (tier) => {
     setCurrentSponsor(null);
     setCurrentTierForSponsor(tier);
@@ -106,24 +148,18 @@ function SponsorsPage() {
     setIsSaving(true);
     try {
       let sponsorId;
-
       if (currentSponsor) {
-        // Editing existing sponsor
         await updateSponsor(currentSponsor._id, formData);
         sponsorId = currentSponsor._id;
       } else {
-        // Adding new sponsor
         const result = await addSponsor(currentTierForSponsor._id, formData);
         sponsorId = result.data._id;
       }
-
-      // Upload logo if a file was selected
       if (logoFile && sponsorId) {
         const logoFormData = new FormData();
         logoFormData.append("logo", logoFile);
         await uploadSponsorLogo(sponsorId, logoFormData);
       }
-
       await fetchTiers();
       setIsSponsorDialogOpen(false);
     } catch (err) {
@@ -146,26 +182,87 @@ function SponsorsPage() {
     }
   };
 
+  // ── Drag-and-drop reorder ─────────────────────────────────────────────────
+
+  const handleDragStart = (e, idx) => {
+    setDragIdx(idx);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e, idx) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragIdx === null || dragIdx === idx) return;
+    const updated = [...localTiers];
+    const [moved] = updated.splice(dragIdx, 1);
+    updated.splice(idx, 0, moved);
+    setLocalTiers(updated);
+    setDragIdx(idx);
+    setOrderChanged(true);
+  };
+
+  const handleDragEnd = () => setDragIdx(null);
+
+  const handleSaveOrder = async () => {
+    setIsSaving(true);
+    try {
+      const orderData = localTiers.map((t, i) => ({ id: t._id, order: i + 1 }));
+      await reorderTiers(orderData);
+      await fetchTiers();
+      setOrderChanged(false);
+    } catch (err) {
+      console.error("Failed to save order:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
   return (
     <div className="sponsors-container">
-      {/* Page header */}
+      {/* ── Page header ── */}
       <div className="sponsors-header">
-        <div>
+        <div className="sponsors-header-text">
           <h1>Our Sponsors</h1>
           <p>
-            Thank you to all who support Country Fair Days and make our
-            community celebration possible.
+            Country Fair Days wouldn&apos;t be possible without the generous
+            support of our sponsors. Their contributions allow us to bring the
+            community together year after year for events, activities, and
+            celebrations that create lasting memories. We are deeply grateful
+            for each and every sponsor who believes in what we do.
           </p>
         </div>
-        {isAdmin && (
-          <button className="sponsors-add-tier-btn" onClick={openAddTier}>
-            + Add Tier
+
+        <div className="sponsors-actions">
+          <button
+            className="sponsor-action-btn sponsor-action-btn--outline"
+            onClick={() => setIsTierListModalOpen(true)}
+            type="button"
+          >
+            Sponsor Tier List
           </button>
-        )}
+          <button
+            className="sponsor-action-btn sponsor-action-btn--primary"
+            onClick={() => setIsBecomeASponsorModalOpen(true)}
+            type="button"
+          >
+            Become a Sponsor
+          </button>
+          {isAdmin && (
+            <button
+              className="sponsors-manage-btn"
+              onClick={() => setIsEditTiersOpen(true)}
+              type="button"
+            >
+              Edit Tiers
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Tier sections */}
-      {tiers.map((tier, index) => (
+      {/* ── Tier sections ── */}
+      {tiers.map((tier) => (
         <div
           className="tier-section"
           key={tier._id}
@@ -177,13 +274,7 @@ function SponsorsPage() {
                 className="tier-badge"
                 style={{ backgroundColor: tier.color }}
               >
-                Level {index + 1}
-              </div>
-              <div>
-                <h2 className="tier-name">{tier.name}</h2>
-                {tier.contributionRange && (
-                  <span className="tier-range">{tier.contributionRange}</span>
-                )}
+                {tier.name}
               </div>
             </div>
             {isAdmin && (
@@ -196,18 +287,6 @@ function SponsorsPage() {
               </button>
             )}
           </div>
-
-          {tier.benefits && tier.benefits.length > 0 && (
-            <ul className="tier-benefits">
-              {tier.benefits.map((b, i) => (
-                <li key={i}>{b}</li>
-              ))}
-            </ul>
-          )}
-
-          {tier.description && (
-            <p className="tier-description">{tier.description}</p>
-          )}
 
           {/* Sponsors grid */}
           <div className="tier-sponsors">
@@ -255,12 +334,12 @@ function SponsorsPage() {
               </button>
             )}
 
-            {!isAdmin &&
-              (!tier.sponsors || tier.sponsors.length === 0) && (
-                <p className="no-sponsors">
-                  Sponsor opportunities available. Contact us to learn more.
-                </p>
-              )}
+            {!isAdmin && (!tier.sponsors || tier.sponsors.length === 0) && (
+              <p className="no-sponsors">
+                Sponsor opportunities available — see our tier list to learn
+                more.
+              </p>
+            )}
           </div>
         </div>
       ))}
@@ -269,10 +348,186 @@ function SponsorsPage() {
         <div className="no-tiers">Loading sponsor tiers...</div>
       )}
 
-      {/* Dialogs */}
+      {/* ── Edit Tiers Manager Modal (admin) ── */}
+      {isEditTiersOpen && (
+        <div
+          className="sp-modal-overlay"
+          onClick={() => setIsEditTiersOpen(false)}
+        >
+          <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="sp-modal-header">
+              <h2>Edit Tiers</h2>
+              <button
+                className="sp-modal-close"
+                onClick={() => setIsEditTiersOpen(false)}
+                aria-label="Close"
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="sp-modal-body">
+              <p className="et-hint">
+                Drag tiers to reorder how they appear on the page.
+              </p>
+
+              <ul className="et-list">
+                {localTiers.map((tier, idx) => (
+                  <li
+                    key={tier._id}
+                    className={`et-row${dragIdx === idx ? " et-row--dragging" : ""}`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, idx)}
+                    onDragOver={(e) => handleDragOver(e, idx)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <span className="et-drag-handle" aria-hidden="true">
+                      ⠿
+                    </span>
+                    <span
+                      className="et-badge"
+                      style={{ backgroundColor: tier.color }}
+                    >
+                      {tier.name}
+                    </span>
+                    <button
+                      className="et-edit-btn"
+                      onClick={() => openTierDialogFromManager(tier)}
+                      type="button"
+                    >
+                      Edit
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                className="et-add-btn"
+                onClick={openAddTierFromManager}
+                type="button"
+              >
+                + Add Tier
+              </button>
+            </div>
+
+            <div className="sp-modal-footer">
+              <button
+                className="sp-footer-btn sp-footer-btn--cancel"
+                onClick={() => setIsEditTiersOpen(false)}
+                type="button"
+              >
+                Close
+              </button>
+              <button
+                className={`sp-footer-btn sp-footer-btn--save${orderChanged ? "" : " sp-footer-btn--disabled"}`}
+                onClick={handleSaveOrder}
+                disabled={!orderChanged || isSaving}
+                type="button"
+              >
+                {isSaving ? "Saving..." : "Save Order"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Sponsor Tier List Modal ── */}
+      {isTierListModalOpen && (
+        <div
+          className="sp-modal-overlay"
+          onClick={() => setIsTierListModalOpen(false)}
+        >
+          <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="sp-modal-header">
+              <h2>Sponsor Tier Levels</h2>
+              <button
+                className="sp-modal-close"
+                onClick={() => setIsTierListModalOpen(false)}
+                aria-label="Close"
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+            <div className="sp-modal-body">
+              {tiers.length === 0 ? (
+                <p className="sp-modal-empty">No tiers configured yet.</p>
+              ) : (
+                tiers.map((tier) => (
+                  <div
+                    key={tier._id}
+                    className="sp-tier-row"
+                    style={{ "--tier-color": tier.color }}
+                  >
+                    <div className="sp-tier-row-header">
+                      <div
+                        className="tier-badge"
+                        style={{ backgroundColor: tier.color }}
+                      >
+                        {tier.name}
+                      </div>
+                      {tier.contributionRange && (
+                        <span className="sp-tier-row-range">
+                          {tier.contributionRange}
+                        </span>
+                      )}
+                    </div>
+
+                    {tier.description && (
+                      <p className="sp-tier-row-desc">{tier.description}</p>
+                    )}
+
+                    {tier.benefits && tier.benefits.length > 0 && (
+                      <ul className="sp-tier-row-benefits">
+                        {tier.benefits.map((b, i) => (
+                          <li key={i}>{b}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Become a Sponsor Modal (placeholder) ── */}
+      {isBecomeASponsorModalOpen && (
+        <div
+          className="sp-modal-overlay"
+          onClick={() => setIsBecomeASponsorModalOpen(false)}
+        >
+          <div className="sp-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="sp-modal-header">
+              <h2>Become a Sponsor</h2>
+              <button
+                className="sp-modal-close"
+                onClick={() => setIsBecomeASponsorModalOpen(false)}
+                aria-label="Close"
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+            <div className="sp-modal-body sp-modal-todo">
+              <div className="sp-todo-badge">TODO</div>
+              <p>
+                Create a form here that allows interested sponsors to submit a
+                request to the organizers. The form should collect contact
+                information, desired tier, and any questions, then send the
+                submission to the event organizers.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Admin Dialogs ── */}
       <TierDialog
         isOpen={isTierDialogOpen}
-        onClose={() => setIsTierDialogOpen(false)}
+        onClose={handleTierDialogClose}
         tier={currentTier}
         onSave={handleSaveTier}
         onDelete={handleDeleteTier}

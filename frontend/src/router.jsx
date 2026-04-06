@@ -11,6 +11,7 @@ import AccountPage from "./pages/AccountPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import SponsorsPage from "./pages/SponsorsPage";
+import GalleryPage from "./pages/GalleryPage";
 
 // Import dedicated event pages
 import PickleballPage from "./pages/PickleballPage";
@@ -122,7 +123,7 @@ const Router = () => {
         path="/gallery"
         element={
           <Layout>
-            <PlaceholderPage title="Photo Gallery" />
+            <GalleryPage />
           </Layout>
         }
       />

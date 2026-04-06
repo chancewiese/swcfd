@@ -8,9 +8,10 @@ const imagesDir = path.join(__dirname, "../images");
 const eventsDir = path.join(imagesDir, "events");
 const pickleballDir = path.join(eventsDir, "pickleball");
 const homepageDir = path.join(imagesDir, "homepage");
+const galleryDir = path.join(imagesDir, "gallery");
 
 // Create directories if they don't exist
-[imagesDir, eventsDir, pickleballDir, homepageDir].forEach((dir) => {
+[imagesDir, eventsDir, pickleballDir, homepageDir, galleryDir].forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
     console.log(`Created directory at: ${dir}`);
@@ -30,6 +31,8 @@ const storage = multer.diskStorage({
       destination = pickleballDir;
     } else if (eventSlug === "homepage") {
       destination = homepageDir;
+    } else if (eventSlug === "gallery") {
+      destination = galleryDir;
     } else if (eventSlug) {
       // For other events, create a directory under events/
       const eventDir = path.join(eventsDir, eventSlug);

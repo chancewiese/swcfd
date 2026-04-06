@@ -179,6 +179,27 @@ exports.deleteTier = async (req, res) => {
   }
 };
 
+// PUT /api/sponsors/tiers/reorder
+exports.reorderTiers = async (req, res) => {
+  try {
+    const { tiers } = req.body; // [{ id, order }, ...]
+    if (!Array.isArray(tiers)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "tiers must be an array" });
+    }
+    await Promise.all(
+      tiers.map(({ id, order }) =>
+        SponsorTier.findByIdAndUpdate(id, { order }),
+      ),
+    );
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // POST /api/sponsors/tiers/:tierId/entries
 exports.addSponsor = async (req, res) => {
   try {

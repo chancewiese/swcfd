@@ -31,6 +31,12 @@ const SiteSettingsSchema = new Schema(
         order: { type: Number, default: 0 },
       },
     ],
+    photos: [
+      {
+        name: { type: String, default: "" },
+        imageUrl: { type: String, required: true },
+      },
+    ],
   },
   { timestamps: true },
 );

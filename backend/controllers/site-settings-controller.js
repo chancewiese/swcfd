@@ -140,14 +140,42 @@ exports.updateAbout = async (req, res) => {
 
 // ── Contact / Organizers ──────────────────────────────────────────────────────
 
+const DEFAULT_ORGANIZERS = [
+  { name: "Tani Lynch", role: "Chairman", phone: "801-603-3456", email: "tanilynch@yahoo.com", order: 0 },
+  { name: "Traci Wiese", role: "Co-Chairman", phone: "801-388-2530", email: "tdwiese@yahoo.com", order: 1 },
+  { name: "Vicki Christensen", role: "Co-Chairman", phone: "801-725-3070", email: "christensenvictoria6@gmail.com", order: 2 },
+  { name: "Candace Mikesell", role: "Pop Up Sweet Shop", phone: "801-721-7546", email: "", order: 3 },
+  { name: "Daren Gardner", role: "Golf", phone: "801-941-0559", email: "", order: 4 },
+  { name: "Jo Sjoblom", role: "Pickleball", phone: "801-628-3905", email: "", order: 5 },
+  { name: "Darin Sjoblom", role: "Pickleball", phone: "801-633-6237", email: "", order: 6 },
+  { name: "Lacee Loveless", role: "Parade", phone: "385-298-9646", email: "", order: 7 },
+  { name: "Michael and Amy Poff", role: "Monday Dinner", phone: "801-540-6930", email: "", order: 8 },
+  { name: "Greg Andersen", role: "Family Game Night", phone: "", email: "", order: 9 },
+  { name: "Alexx Keetch", role: "Little Buckaroo Rodeo", phone: "801-389-1664", email: "", order: 10 },
+  { name: "Natalie Browning", role: "Kids K", phone: "801-391-3948", email: "", order: 11 },
+  { name: "City Council", role: "Movie in the Park", phone: "", email: "", order: 12 },
+  { name: "Curtis Brown", role: "3 Point Basketball Contest", phone: "801-476-4445", email: "", order: 13 },
+  { name: "Skyler Becraft", role: "Richard Bouchard Memorial Race", phone: "801-710-2625", email: "", order: 14 },
+  { name: "McKenzie Esplin", role: "Booths", phone: "435-704-4576", email: "mckenzie.esplin@gmail.com", order: 15 },
+  { name: "Jeni Poll", role: "Old Timers Ball Game", phone: "801-628-0880", email: "", order: 16 },
+  { name: "Jill Kap", role: "Old Timers Ball Game", phone: "801-336-0470", email: "", order: 17 },
+  { name: "Josh & Heidi Nilson", role: "Car Show", phone: "801-814-1688", email: "heidinilson@hotmail.com", order: 18 },
+  { name: "Vicki Christensen", role: "Entertainment", phone: "801-725-3070", email: "", order: 19 },
+  { name: "Traci Wiese", role: "Chalk Art", phone: "801-388-2530", email: "", order: 20 },
+];
+
 // GET /api/site/contact
-// Returns organizers from the 'contact' document
+// Returns organizers from the 'contact' document, seeding defaults if empty
 exports.getContact = async (req, res) => {
   try {
     const settings = await getOrCreateByKey("contact");
+    if (!settings.organizers || settings.organizers.length === 0) {
+      settings.organizers = DEFAULT_ORGANIZERS;
+      await settings.save();
+    }
     res.status(200).json({
       success: true,
-      data: settings.organizers || [],
+      data: settings.organizers,
     });
   } catch (err) {
     console.error(err);
@@ -215,6 +243,65 @@ exports.deleteOrganizer = async (req, res) => {
     settings.organizers.splice(index, 1);
     await settings.save();
     res.status(200).json({ success: true, message: "Organizer deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ── Photo Gallery ─────────────────────────────────────────────────────────────
+
+// GET /api/site/gallery
+exports.getGalleryPhotos = async (req, res) => {
+  try {
+    const settings = await getOrCreateByKey("gallery");
+    res.status(200).json({ success: true, data: settings.photos || [] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// POST /api/site/gallery/upload
+exports.uploadGalleryPhoto = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No image file provided" });
+    }
+    const settings = await getOrCreateByKey("gallery");
+    const imagePath = `/images/gallery/${req.file.filename}`;
+    settings.photos.push({ name: req.body.name || "", imageUrl: imagePath });
+    await settings.save();
+    const added = settings.photos[settings.photos.length - 1];
+    res.status(201).json({ success: true, data: added });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// DELETE /api/site/gallery/:photoId
+exports.deleteGalleryPhoto = async (req, res) => {
+  try {
+    const { photoId } = req.params;
+    const settings = await getOrCreateByKey("gallery");
+    const index = settings.photos.findIndex((p) => p._id.toString() === photoId);
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: "Photo not found" });
+    }
+    const imagePath = settings.photos[index].imageUrl;
+    if (imagePath) {
+      try {
+        const filename = path.basename(imagePath);
+        const absolutePath = path.join(__dirname, "../images/gallery", filename);
+        if (fs.existsSync(absolutePath)) fs.unlinkSync(absolutePath);
+      } catch (fileErr) {
+        console.error("Error deleting gallery photo file:", fileErr);
+      }
+    }
+    settings.photos.splice(index, 1);
+    await settings.save();
+    res.status(200).json({ success: true, message: "Photo deleted" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: err.message });

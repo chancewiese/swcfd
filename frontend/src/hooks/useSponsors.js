@@ -49,6 +49,15 @@ const useSponsors = () => {
     return response.data;
   }, []);
 
+  const reorderTiers = useCallback(async (tiers) => {
+    const response = await axios.put(
+      `${API_BASE_URL}/sponsors/tiers/reorder`,
+      { tiers },
+      { withCredentials: true },
+    );
+    return response.data;
+  }, []);
+
   const addSponsor = useCallback(async (tierId, data) => {
     const response = await axios.post(
       `${API_BASE_URL}/sponsors/tiers/${tierId}/entries`,
@@ -91,6 +100,7 @@ const useSponsors = () => {
     createTier,
     updateTier,
     deleteTier,
+    reorderTiers,
     addSponsor,
     updateSponsor,
     deleteSponsor,

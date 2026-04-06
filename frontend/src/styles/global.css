@@ -23,6 +23,9 @@
 
   /* Typography */
   --font-family: "Arial", sans-serif;
+
+  /* Layout */
+  --header-height: 64px;
 }
 
 body {
