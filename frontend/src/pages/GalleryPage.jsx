@@ -1,28 +1,24 @@
 // src/pages/GalleryPage.jsx
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useDevMode } from "../context/DevModeContext";
 import useSiteSettings from "../hooks/useSiteSettings";
 import PhotoManagerDialog from "../components/gallery/PhotoManagerDialog";
 import { getImageUrl } from "../utils/imageUtils";
 import "./styles/GalleryPage.css";
 
 function GalleryPage() {
-  const { isAuthenticated, hasRole } = useAuth();
+  const { hasRole } = useAuth();
+  const { devMode } = useDevMode();
   const { getGalleryPhotos } = useSiteSettings();
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdmin = hasRole("admin") && devMode;
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
 
   // Lightbox state
   const [lightboxIndex, setLightboxIndex] = useState(null);
-
-  useEffect(() => {
-    if (isAuthenticated && hasRole) {
-      setIsAdmin(hasRole("admin"));
-    }
-  }, [isAuthenticated, hasRole]);
 
   const fetchPhotos = useCallback(async () => {
     setLoading(true);

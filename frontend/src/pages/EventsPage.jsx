@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useEvents from "../hooks/useEvents";
 import { useAuth } from "../context/AuthContext";
+import { useDevMode } from "../context/DevModeContext";
 import {
   getImageUrl,
   handleImageError,
@@ -13,15 +14,10 @@ import "./styles/EventsPage.css";
 function EventsPage() {
   const [events, setEvents] = useState([]);
   const { getEvents, loading, error } = useEvents();
-  const { isAuthenticated, hasRole } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { hasRole } = useAuth();
+  const { devMode } = useDevMode();
 
-  useEffect(() => {
-    // Check if user is admin
-    if (isAuthenticated && hasRole) {
-      setIsAdmin(hasRole("admin"));
-    }
-  }, [isAuthenticated, hasRole]);
+  const isAdmin = hasRole("admin") && devMode;
 
   useEffect(() => {
     const fetchEvents = async () => {

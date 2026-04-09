@@ -132,6 +132,73 @@
   background-color: rgba(255, 255, 255, 0.35);
 }
 
+/* Dev Mode Toggle */
+.dev-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.dev-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dev-toggle--active {
+  border-color: #4ade80;
+  color: #4ade80;
+}
+
+.dev-toggle--active:hover {
+  border-color: #86efac;
+  color: #86efac;
+}
+
+.dev-toggle-track {
+  display: inline-flex;
+  align-items: center;
+  width: 1.75rem;
+  height: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.dev-toggle--active .dev-toggle-track {
+  background: #4ade80;
+}
+
+.dev-toggle-thumb {
+  position: absolute;
+  left: 0.15rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.dev-toggle--active .dev-toggle-thumb {
+  transform: translateX(0.75rem);
+}
+
+.dev-toggle-label {
+  line-height: 1;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .account-name {

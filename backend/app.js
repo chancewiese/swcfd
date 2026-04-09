@@ -20,6 +20,7 @@ const familyRoutes = require("./routers/family-router");
 const eventRoutes = require("./routers/event-router");
 const siteSettingsRoutes = require("./routers/site-settings-router");
 const sponsorRoutes = require("./routers/sponsor-router");
+const registrationRoutes = require("./routers/registration-router");
 
 // Initialize Express app
 const app = express();
@@ -62,6 +63,7 @@ app.use("/api/families", familyRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/site", siteSettingsRoutes);
 app.use("/api/sponsors", sponsorRoutes);
+app.use("/api/registrations", registrationRoutes);
 
 // Add a simple test route
 app.get("/test", (req, res) => {

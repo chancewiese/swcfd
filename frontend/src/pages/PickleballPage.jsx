@@ -2,15 +2,19 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useDevMode } from "../context/DevModeContext";
 import useEvents from "../hooks/useEvents";
 import EditPickleballDialog from "../components/events/pickleball/EditPickleballDialog";
 import PickleballSectionDialog from "../components/events/pickleball/PickleballSectionDialog";
 import GalleryEditDialog from "../components/events/pickleball/GalleryEditDialog";
+import SectionRegistrationsDialog from "../components/events/pickleball/SectionRegistrationsDialog";
+import useRegistration from "../hooks/useRegistration";
 import { getImageUrl, handleImageError } from "../utils/imageUtils";
 import "./styles/PickleballPage.css";
 
 const PickleballPage = () => {
-  const { isAuthenticated, hasRole } = useAuth();
+  const { hasRole } = useAuth();
+  const { devMode } = useDevMode();
   const {
     getEvent,
     updateEvent,
@@ -24,19 +28,15 @@ const PickleballPage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSectionDialogOpen, setIsSectionDialogOpen] = useState(false);
   const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
+  const [isRegistrationsDialogOpen, setIsRegistrationsDialogOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState(null);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(-1);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [registrationCounts, setRegistrationCounts] = useState({});
+  const { getSectionRegistrationCount } = useRegistration();
+  const isAdmin = hasRole("admin") && devMode;
   const [eventData, setEventData] = useState(null);
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Check if user is admin
-  useEffect(() => {
-    if (isAuthenticated && hasRole) {
-      setIsAdmin(hasRole("admin"));
-    }
-  }, [isAuthenticated, hasRole]);
 
   // Fetch the event data
   const fetchEventData = async () => {
@@ -44,8 +44,21 @@ const PickleballPage = () => {
       const response = await getEvent("pickleball-tournament");
       if (response && response.data) {
         setEventData(response.data);
-        console.log("Event data loaded:", response.data);
-        console.log("Image gallery:", response.data.imageGallery);
+        // Fetch registration counts for each section
+        if (response.data.sections?.length) {
+          const counts = {};
+          await Promise.all(
+            response.data.sections.map(async (section) => {
+              try {
+                const res = await getSectionRegistrationCount(section._id);
+                counts[section._id] = res?.data?.count ?? 0;
+              } catch {
+                counts[section._id] = 0;
+              }
+            })
+          );
+          setRegistrationCounts(counts);
+        }
       }
     } catch (err) {
       console.error("Failed to fetch pickleball event data:", err);
@@ -361,13 +374,26 @@ const PickleballPage = () => {
                     </div>
 
                     {isAdmin && (
-                      <button
-                        className="edit-section-button"
-                        onClick={() => handleEditSection(section, index)}
-                        type="button"
-                      >
-                        Edit
-                      </button>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button
+                          className="edit-section-button"
+                          onClick={() => {
+                            setCurrentSection(section);
+                            setIsRegistrationsDialogOpen(true);
+                          }}
+                          type="button"
+                          style={{ borderColor: "#2e7d32", color: "#2e7d32" }}
+                        >
+                          Registrations
+                        </button>
+                        <button
+                          className="edit-section-button"
+                          onClick={() => handleEditSection(section, index)}
+                          type="button"
+                        >
+                          Edit
+                        </button>
+                      </div>
                     )}
                   </div>
 
@@ -404,7 +430,7 @@ const PickleballPage = () => {
                       <div className="info-item">
                         <span className="info-label">Teams:</span>
                         <span>
-                          0 /{" "}
+                          {registrationCounts[section._id] ?? 0} /{" "}
                           {section.capacity || section.maxTeams || "Unlimited"}
                         </span>
                       </div>
@@ -423,7 +449,7 @@ const PickleballPage = () => {
 
                     <div className="section-action">
                       <Link
-                        to="/register/pickleball"
+                        to={`/register/pickleball?section=${section._id}`}
                         className="register-button"
                       >
                         Register
@@ -556,6 +582,14 @@ const PickleballPage = () => {
           eventSlug={eventData.titleSlug}
           images={eventData.imageGallery || []}
           onImagesUpdated={handleGalleryUpdated}
+        />
+      )}
+
+      {isRegistrationsDialogOpen && (
+        <SectionRegistrationsDialog
+          isOpen={isRegistrationsDialogOpen}
+          onClose={() => setIsRegistrationsDialogOpen(false)}
+          section={currentSection}
         />
       )}
     </div>

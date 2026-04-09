@@ -15,6 +15,7 @@ import GalleryPage from "./pages/GalleryPage";
 
 // Import dedicated event pages
 import PickleballPage from "./pages/PickleballPage";
+import PickleballRegistrationPage from "./pages/PickleballRegistrationPage";
 
 // Import auth pages
 import LoginPage from "./pages/LoginPage";
@@ -101,12 +102,12 @@ const Router = () => {
         }
       />
 
-      {/* Registration placeholder */}
+      {/* Pickleball Registration */}
       <Route
         path="/register/pickleball"
         element={
           <Layout>
-            <PlaceholderPage title="Pickleball Tournament Registration" />
+            <PickleballRegistrationPage />
           </Layout>
         }
       />

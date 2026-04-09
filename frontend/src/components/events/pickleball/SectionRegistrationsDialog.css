@@ -1,0 +1,454 @@
+/* src/components/events/pickleball/SectionRegistrationsDialog.css */
+
+.reg-manage-dialog {
+  max-width: 800px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.reg-manage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.reg-manage-header h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  color: var(--primary-color);
+}
+
+.reg-manage-subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.reg-manage-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.reg-manage-close:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Capacity bar */
+.reg-capacity-bar {
+  margin: 0 1.5rem;
+  margin-top: 0.75rem;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  height: 8px;
+  position: relative;
+  overflow: visible;
+}
+
+.reg-capacity-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.reg-capacity-label {
+  position: absolute;
+  right: 0;
+  top: 12px;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+/* Filter tabs */
+.reg-filter-tabs {
+  display: flex;
+  gap: 0;
+  padding: 1rem 1.5rem 0;
+  border-bottom: 1px solid #eee;
+  overflow-x: auto;
+}
+
+.reg-filter-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.reg-filter-tab:hover {
+  color: #333;
+}
+
+.reg-filter-tab.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.reg-filter-count {
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+}
+
+.reg-filter-tab.active .reg-filter-count {
+  background-color: #e3f2fd;
+  color: var(--primary-color);
+}
+
+/* Registration list */
+.reg-list {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: 0.75rem 1.5rem;
+}
+
+.reg-list-loading,
+.reg-list-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* Registration item */
+.reg-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.reg-item.confirmed {
+  border-color: #a5d6a7;
+}
+
+.reg-item.cancelled {
+  opacity: 0.65;
+}
+
+.reg-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  user-select: none;
+  background-color: #fafafa;
+}
+
+.reg-item.confirmed .reg-item-header {
+  background-color: #f1f8e9;
+}
+
+.reg-item-header:hover {
+  background-color: #f0f0f0;
+}
+
+.reg-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.reg-item-team {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #222;
+}
+
+.reg-item-family {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.reg-item-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.reg-item-date {
+  font-size: 0.78rem;
+  color: #aaa;
+}
+
+.reg-expand-icon {
+  font-size: 0.7rem;
+  color: #aaa;
+}
+
+/* Badges */
+.reg-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+}
+
+.reg-badge-pending {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.reg-badge-confirmed {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.reg-badge-cancelled {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.reg-badge-payment-unpaid {
+  background-color: #fce4ec;
+  color: #ad1457;
+}
+
+.reg-badge-payment-paid {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.reg-badge-payment-refunded {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+/* Item body (expanded) */
+.reg-item-body {
+  padding: 1rem;
+  border-top: 1px solid #e0e0e0;
+  background: white;
+}
+
+.reg-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.reg-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.reg-detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #888;
+}
+
+.reg-detail-item a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.reg-detail-item a:hover {
+  text-decoration: underline;
+}
+
+.reg-detail-item span {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Players */
+.reg-players-section {
+  margin-bottom: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.reg-players-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reg-player-chip {
+  background-color: #e3f2fd;
+  color: var(--primary-color);
+  padding: 0.25rem 0.7rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.reg-notes {
+  font-size: 0.875rem;
+  color: #555;
+  margin-bottom: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* Item actions */
+.reg-item-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.reg-action-btn {
+  padding: 0.4rem 0.875rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.reg-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reg-action-btn.confirm {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.reg-action-btn.confirm:hover:not(:disabled) {
+  background-color: #1b5e20;
+}
+
+.reg-action-btn.edit {
+  background-color: #e3f2fd;
+  color: var(--primary-color);
+  border: 1px solid #90caf9;
+}
+
+.reg-action-btn.edit:hover:not(:disabled) {
+  background-color: #bbdefb;
+}
+
+.reg-action-btn.cancel {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.reg-action-btn.cancel:hover:not(:disabled) {
+  background-color: #ffcdd2;
+}
+
+.reg-action-btn.save {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.reg-action-btn.save:hover:not(:disabled) {
+  background-color: #1565c0;
+}
+
+.reg-action-btn.cancel-edit {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+/* Edit form */
+.reg-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.reg-edit-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.reg-edit-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.reg-edit-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.reg-edit-select,
+.reg-edit-textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.reg-edit-select:focus,
+.reg-edit-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.reg-edit-textarea {
+  resize: vertical;
+}
+
+.reg-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .reg-manage-header {
+    padding: 1rem;
+  }
+
+  .reg-filter-tabs {
+    padding: 0.75rem 1rem 0;
+  }
+
+  .reg-list {
+    padding: 0.5rem 1rem;
+  }
+
+  .reg-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reg-edit-row {
+    flex-direction: column;
+  }
+
+  .reg-item-badges {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+}

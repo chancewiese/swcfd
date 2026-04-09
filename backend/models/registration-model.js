@@ -4,13 +4,11 @@ const Schema = mongoose.Schema;
 
 // Schema for registrants who can be from the system or external
 const RegistrantSchema = new Schema({
-  // If the registrant is a reference to an existing entity
   registrantType: {
     type: String,
     enum: ["user", "familyMember", "external"],
     required: true,
   },
-  // Reference to either a User or FamilyMember
   user: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -54,31 +52,43 @@ const RegistrationSchema = new Schema(
       ref: "Event",
       required: [true, "Event reference is required"],
     },
-    // The event section being registered for
+    // The event section/division being registered for
     eventSection: {
       type: Schema.Types.ObjectId,
       ref: "EventSection",
       required: [true, "Event section is required"],
     },
-    // Registration type will be auto-assigned based on form
+    // The user who submitted the registration
+    registeredBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Registrant user is required"],
+    },
+    // The family this registration belongs to
+    family: {
+      type: Schema.Types.ObjectId,
+      ref: "Family",
+    },
+    // Registration type
     registrationType: {
       type: String,
       enum: ["individual", "family", "team"],
+      default: "team",
       required: [true, "Registration type is required"],
     },
-    // For individual or family registrations
+    // For family registrations
     familyMembers: [
       {
         type: Schema.Types.ObjectId,
         ref: "FamilyMember",
       },
     ],
-    // For team registrations
+    // Team info
     teamName: {
       type: String,
       trim: true,
     },
-    // Team members can be users, family members, or external people
+    // Team members (can be users, family members, or external)
     teamMembers: [RegistrantSchema],
     // Registration status
     status: {
@@ -86,23 +96,37 @@ const RegistrationSchema = new Schema(
       enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
     },
+    // Payment status
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "paid", "refunded"],
+      default: "unpaid",
+    },
+    // Contact info for this registration
+    contactEmail: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    contactPhone: {
+      type: String,
+      trim: true,
+    },
+    // Admin notes
+    notes: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 );
 
-// Virtual for total team members
+// Virtual for team size
 RegistrationSchema.virtual("teamSize").get(function () {
-  if (this.registrationType !== "team" || !this.teamMembers) return 0;
+  if (!this.teamMembers) return 0;
   return this.teamMembers.length;
 });
 
-// Virtual for total family members
-RegistrationSchema.virtual("familySize").get(function () {
-  if (!this.familyMembers) return 0;
-  return this.familyMembers.length;
-});
-
-// Create model from schema
 const Registration = mongoose.model("Registration", RegistrationSchema);
 
 module.exports = Registration;

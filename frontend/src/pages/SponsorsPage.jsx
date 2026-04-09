@@ -1,6 +1,7 @@
 // src/pages/SponsorsPage.jsx
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Fragment } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useDevMode } from "../context/DevModeContext";
 import useSponsors from "../hooks/useSponsors";
 import TierDialog from "../components/sponsors/TierDialog";
 import SponsorDialog from "../components/sponsors/SponsorDialog";
@@ -8,7 +9,8 @@ import { getImageUrl } from "../utils/imageUtils";
 import "./styles/SponsorsPage.css";
 
 function SponsorsPage() {
-  const { isAuthenticated, hasRole } = useAuth();
+  const { hasRole } = useAuth();
+  const { devMode } = useDevMode();
   const {
     getTiers,
     createTier,
@@ -22,7 +24,7 @@ function SponsorsPage() {
     loading,
   } = useSponsors();
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdmin = hasRole("admin") && devMode;
   const [tiers, setTiers] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -45,12 +47,6 @@ function SponsorsPage() {
   const [isTierListModalOpen, setIsTierListModalOpen] = useState(false);
   const [isBecomeASponsorModalOpen, setIsBecomeASponsorModalOpen] =
     useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated && hasRole) {
-      setIsAdmin(hasRole("admin"));
-    }
-  }, [isAuthenticated, hasRole]);
 
   const fetchTiers = useCallback(async () => {
     const response = await getTiers();
@@ -291,47 +287,77 @@ function SponsorsPage() {
           {/* Sponsors grid */}
           <div className="tier-sponsors">
             {tier.sponsors &&
-              tier.sponsors.map((sponsor) => (
-                <div className="sponsor-card" key={sponsor._id}>
-                  {isAdmin && (
-                    <button
-                      className="sponsor-edit-btn"
-                      onClick={() => openEditSponsor(sponsor, tier)}
-                      type="button"
+              tier.sponsors.map((sponsor, idx) => {
+                const col = (idx % 4) + 1;
+                const imageRow = Math.floor(idx / 4) * 2 + 1;
+                return (
+                  <Fragment key={sponsor._id}>
+                    <div
+                      className="sponsor-image-cell"
+                      style={isAdmin ? { gridColumn: col, gridRow: imageRow } : undefined}
                     >
-                      Edit
-                    </button>
-                  )}
-                  {sponsor.logoUrl ? (
-                    <img
-                      src={getImageUrl(sponsor.logoUrl)}
-                      alt={sponsor.name}
-                      className="sponsor-logo"
-                    />
-                  ) : (
-                    <div className="sponsor-name-badge">{sponsor.name}</div>
-                  )}
-                  {sponsor.website && (
-                    <a
-                      href={sponsor.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="sponsor-website"
-                    >
-                      Visit
-                    </a>
-                  )}
-                </div>
-              ))}
+                      {sponsor.website ? (
+                        <a
+                          href={sponsor.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="sponsor-logo-link"
+                        >
+                          {sponsor.logoUrl ? (
+                            <img
+                              src={getImageUrl(sponsor.logoUrl)}
+                              alt={sponsor.name}
+                              className="sponsor-logo"
+                            />
+                          ) : (
+                            <div className="sponsor-name-badge">
+                              {sponsor.name}
+                            </div>
+                          )}
+                        </a>
+                      ) : sponsor.logoUrl ? (
+                        <img
+                          src={getImageUrl(sponsor.logoUrl)}
+                          alt={sponsor.name}
+                          className="sponsor-logo"
+                        />
+                      ) : (
+                        <div className="sponsor-name-badge">{sponsor.name}</div>
+                      )}
+                    </div>
+                    {isAdmin && (
+                      <div
+                        className="sponsor-edit-cell"
+                        style={{ gridColumn: col, gridRow: imageRow + 1 }}
+                      >
+                        <button
+                          className="sponsor-edit-btn"
+                          onClick={() => openEditSponsor(sponsor, tier)}
+                          type="button"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </Fragment>
+                );
+              })}
 
             {isAdmin && (
-              <button
-                className="add-sponsor-btn"
-                onClick={() => openAddSponsor(tier)}
-                type="button"
+              <div
+                style={{
+                  gridColumn: ((tier.sponsors?.length ?? 0) % 4) + 1,
+                  gridRow: Math.floor((tier.sponsors?.length ?? 0) / 4) * 2 + 1,
+                }}
               >
-                + Add Sponsor
-              </button>
+                <button
+                  className="add-sponsor-btn"
+                  onClick={() => openAddSponsor(tier)}
+                  type="button"
+                >
+                  + Add Sponsor
+                </button>
+              </div>
             )}
 
             {!isAdmin && (!tier.sponsors || tier.sponsors.length === 0) && (

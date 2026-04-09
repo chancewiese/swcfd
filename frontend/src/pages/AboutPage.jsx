@@ -1,26 +1,22 @@
 // src/pages/AboutPage.jsx
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useDevMode } from "../context/DevModeContext";
 import useSiteSettings from "../hooks/useSiteSettings";
 import EditAboutDialog from "../components/home/EditAboutDialog";
 import "./styles/AboutPage.css";
 
 function AboutPage() {
-  const { isAuthenticated, hasRole } = useAuth();
+  const { hasRole } = useAuth();
+  const { devMode } = useDevMode();
   const { getAbout, updateAbout } = useSiteSettings();
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdmin = hasRole("admin") && devMode;
   const [aboutContent, setAboutContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated && hasRole) {
-      setIsAdmin(hasRole("admin"));
-    }
-  }, [isAuthenticated, hasRole]);
 
   const fetchAbout = useCallback(async () => {
     setLoading(true);

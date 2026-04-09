@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useDevMode } from "../context/DevModeContext";
 import { useLayout } from "../context/LayoutContext";
 import useSiteSettings from "../hooks/useSiteSettings";
 import HeroGalleryEditDialog from "../components/home/HeroGalleryEditDialog";
@@ -11,16 +12,18 @@ import "./styles/HomePage.css";
 const SLIDE_INTERVAL = 5000;
 
 function HomePage() {
-  const { isAuthenticated, hasRole } = useAuth();
+  const { hasRole } = useAuth();
+  const { devMode } = useDevMode();
   const { setHasHero, setHeroScrollThreshold } = useLayout();
   const { getHeroImages } = useSiteSettings();
+
+  const isAdmin = hasRole("admin") && devMode;
 
   const [heroImages, setHeroImages] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isGalleryDialogOpen, setIsGalleryDialogOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const intervalRef = useRef(null);
   const heroRef = useRef(null);
@@ -43,12 +46,6 @@ function HomePage() {
     window.addEventListener("resize", updateThreshold);
     return () => window.removeEventListener("resize", updateThreshold);
   }, [heroImages, setHeroScrollThreshold]);
-
-  useEffect(() => {
-    if (isAuthenticated && hasRole) {
-      setIsAdmin(hasRole("admin"));
-    }
-  }, [isAuthenticated, hasRole]);
 
   const fetchHeroImages = useCallback(async () => {
     const response = await getHeroImages();

@@ -3,9 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import "./Header.css";
 import { IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import { useDevMode } from "../../context/DevModeContext";
 
 function Header({ toggleSidebar, isAuthenticated, user, transparent }) {
   const navigate = useNavigate();
+  const { devMode, toggleDevMode } = useDevMode();
+
+  const isAdmin = user?.roles?.includes("admin");
 
   const handleAccountClick = () => {
     navigate("/account");
@@ -32,6 +36,18 @@ function Header({ toggleSidebar, isAuthenticated, user, transparent }) {
         </div>
 
         <div className="header-right">
+          {isAuthenticated && isAdmin && (
+            <button
+              className={`dev-toggle${devMode ? " dev-toggle--active" : ""}`}
+              onClick={toggleDevMode}
+              title={devMode ? "Dev mode on — click to disable" : "Dev mode off — click to enable"}
+            >
+              <span className="dev-toggle-track">
+                <span className="dev-toggle-thumb" />
+              </span>
+              <span className="dev-toggle-label">Dev</span>
+            </button>
+          )}
           {isAuthenticated ? (
             <button className="account-button" onClick={handleAccountClick}>
               <div className="avatar-circle">

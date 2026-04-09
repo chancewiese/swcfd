@@ -1,28 +1,24 @@
 // src/pages/ContactPage.jsx
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useDevMode } from "../context/DevModeContext";
 import useSiteSettings from "../hooks/useSiteSettings";
 import OrganizerDialog from "../components/home/OrganizerDialog";
 import "./styles/ContactPage.css";
 
 function ContactPage() {
-  const { isAuthenticated, hasRole } = useAuth();
+  const { hasRole } = useAuth();
+  const { devMode } = useDevMode();
   const { getContact, addOrganizer, updateOrganizer, deleteOrganizer } =
     useSiteSettings();
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isAdmin = hasRole("admin") && devMode;
   const [organizers, setOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   const [isOrganizerDialogOpen, setIsOrganizerDialogOpen] = useState(false);
   const [currentOrganizer, setCurrentOrganizer] = useState(null);
-
-  useEffect(() => {
-    if (isAuthenticated && hasRole) {
-      setIsAdmin(hasRole("admin"));
-    }
-  }, [isAuthenticated, hasRole]);
 
   const fetchContact = useCallback(async () => {
     setLoading(true);

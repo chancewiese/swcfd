@@ -134,13 +134,19 @@ const TierDialog = ({ isOpen, onClose, tier, onSave, onDelete, isSaving }) => {
                   placeholder="#D4AF37"
                   style={{ flex: 1 }}
                 />
-                <div
+                <input
+                  type="color"
+                  name="color"
+                  value={formData.color}
+                  onChange={handleChange}
+                  disabled={isSaving}
                   style={{
                     width: "32px",
                     height: "32px",
                     borderRadius: "4px",
-                    backgroundColor: formData.color,
                     border: "1px solid #ddd",
+                    padding: "1px",
+                    cursor: "pointer",
                     flexShrink: 0,
                   }}
                 />

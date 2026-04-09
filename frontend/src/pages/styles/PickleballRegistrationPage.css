@@ -1,0 +1,734 @@
+/* src/pages/styles/PickleballRegistrationPage.css */
+
+.reg-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Header */
+.reg-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.reg-header h1 {
+  color: var(--primary-color);
+  font-size: 2rem;
+  margin: 0 0 0.25rem;
+}
+
+.reg-header p {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Step Indicator */
+.reg-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  gap: 0;
+}
+
+.reg-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 0.4rem;
+}
+
+.reg-step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  z-index: 1;
+}
+
+.reg-step.active .reg-step-circle {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.reg-step.completed .reg-step-circle {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.reg-step-check {
+  font-size: 1rem;
+}
+
+.reg-step-label {
+  font-size: 0.75rem;
+  color: #888;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.reg-step.active .reg-step-label {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.reg-step.completed .reg-step-label {
+  color: #2e7d32;
+}
+
+.reg-step-line {
+  width: 60px;
+  height: 2px;
+  background-color: #e0e0e0;
+  margin: 0 4px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+/* Main Card */
+.reg-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+}
+
+/* Step Content */
+.reg-step-content h2 {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.reg-step-description {
+  color: #666;
+  margin-bottom: 1.75rem;
+  line-height: 1.5;
+}
+
+/* Division Grid */
+.reg-division-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.reg-division-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  cursor: pointer;
+  text-align: left;
+  background: white;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.reg-division-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+}
+
+.reg-division-card.selected {
+  border-color: var(--primary-color);
+  background-color: #e3f2fd;
+}
+
+.reg-division-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.reg-division-card-header h3 {
+  margin: 0;
+  color: #222;
+  font-size: 1.1rem;
+}
+
+.reg-selected-badge {
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.reg-division-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem;
+  line-height: 1.4;
+}
+
+.reg-division-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.reg-detail-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.reg-detail-label {
+  font-weight: 600;
+  color: #555;
+  min-width: 75px;
+}
+
+/* Form sections */
+.reg-form-section {
+  margin-bottom: 1.75rem;
+}
+
+.reg-form-section h3 {
+  font-size: 1rem;
+  color: #333;
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+
+.reg-form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.reg-form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.reg-form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.reg-input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.reg-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+}
+
+/* Players header */
+.reg-players-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.reg-players-header h3 {
+  margin: 0;
+}
+
+.reg-players-count {
+  font-weight: 400;
+  color: #888;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+/* Add member form */
+.reg-add-member-form {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.reg-add-member-form h4 {
+  margin: 0 0 1rem;
+  color: #333;
+}
+
+.reg-add-member-actions {
+  margin-top: 0.75rem;
+}
+
+/* Player grid */
+.reg-player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.reg-player-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.875rem;
+  cursor: pointer;
+  background: white;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+  position: relative;
+}
+
+.reg-player-card:hover:not(.disabled) {
+  border-color: var(--primary-color);
+}
+
+.reg-player-card.selected {
+  border-color: var(--primary-color);
+  background-color: #e3f2fd;
+}
+
+.reg-player-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reg-player-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.reg-player-card.selected .reg-player-avatar {
+  background-color: #1565c0;
+}
+
+.reg-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.reg-player-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reg-player-meta {
+  font-size: 0.78rem;
+  color: #777;
+}
+
+.reg-player-check {
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Review */
+.reg-review-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.reg-review-section {
+  padding: 1.25rem 1.5rem;
+}
+
+.reg-review-section h3 {
+  margin: 0 0 0.875rem;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  font-weight: 600;
+}
+
+.reg-review-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  align-items: flex-start;
+}
+
+.reg-review-label {
+  font-weight: 600;
+  color: #555;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.reg-review-price {
+  font-weight: 700;
+  color: #2e7d32;
+  font-size: 1rem;
+}
+
+.reg-review-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reg-review-player-tag {
+  background-color: #e3f2fd;
+  color: var(--primary-color);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.reg-review-divider {
+  height: 1px;
+  background-color: #e0e0e0;
+}
+
+/* Payment notice */
+.reg-payment-notice {
+  background-color: #fff8e1;
+  border: 1px solid #ffe082;
+  border-left: 4px solid #f9a825;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 0.875rem;
+  align-items: flex-start;
+}
+
+.reg-payment-notice-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.reg-payment-notice strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 1rem;
+}
+
+.reg-payment-notice p {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Confirmation */
+.reg-confirmation {
+  text-align: center;
+}
+
+.reg-confirmation-icon {
+  font-size: 3.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.reg-confirmation-sub {
+  color: #555;
+  margin-bottom: 1.75rem;
+  font-size: 1rem;
+}
+
+.reg-confirmation-id {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--primary-color);
+}
+
+.reg-status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.reg-status-badge.pending {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.reg-status-badge.confirmed {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.reg-status-badge.cancelled {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.reg-payment-instructions {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.75rem;
+  text-align: left;
+}
+
+.reg-payment-instructions h3 {
+  margin: 0 0 0.875rem;
+  font-size: 1rem;
+  color: #333;
+}
+
+.reg-payment-instructions ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.reg-payment-instructions li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+/* Actions */
+.reg-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #eee;
+  gap: 1rem;
+}
+
+.reg-actions-centered {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.reg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.reg-btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.reg-btn-primary:hover:not(:disabled) {
+  background-color: #1565c0;
+}
+
+.reg-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.reg-btn-secondary {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.reg-btn-secondary:hover {
+  background-color: #e0e0e0;
+}
+
+.reg-btn-outline {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  padding: 0.45rem 0.875rem;
+  font-size: 0.875rem;
+}
+
+.reg-btn-outline:hover {
+  background-color: #e3f2fd;
+}
+
+/* Error */
+.reg-error {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border-left: 3px solid #c62828;
+  font-size: 0.9rem;
+}
+
+/* Empty states */
+.reg-empty-state {
+  background-color: #f5f5f5;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+/* Login prompt */
+.reg-login-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+}
+
+.reg-login-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
+.reg-login-card h2 {
+  color: var(--primary-color);
+  margin: 0 0 0.75rem;
+}
+
+.reg-login-card p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.reg-login-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Loading */
+.reg-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 1rem;
+  color: #666;
+}
+
+.reg-loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e0e0e0;
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.reg-error-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .reg-card {
+    padding: 1.25rem;
+  }
+
+  .reg-step-line {
+    width: 30px;
+  }
+
+  .reg-step-label {
+    display: none;
+  }
+
+  .reg-form-row {
+    flex-direction: column;
+  }
+
+  .reg-division-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reg-player-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reg-players-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .reg-actions {
+    flex-direction: column-reverse;
+  }
+
+  .reg-actions .reg-btn {
+    width: 100%;
+  }
+
+  .reg-review-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .reg-review-label {
+    min-width: auto;
+  }
+}
