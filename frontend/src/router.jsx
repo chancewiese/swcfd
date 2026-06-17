@@ -1,6 +1,6 @@
 // src/router.jsx
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import Layout from "./components/layout/Layout";
+import { Layout } from "./components/layout/Layout";
 
 // Import existing pages
 import HomePage from "./pages/HomePage";

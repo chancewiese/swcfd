@@ -1,37 +1,30 @@
-// src/components/layout/Layout.jsx
 import { useState, useEffect } from "react";
+import styled from "@emotion/styled";
 import { useAuth } from "../../context/AuthContext";
-import Header from "./Header";
-import Footer from "./Footer";
-import SidebarNav from "./SidebarNav";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
+import { SidebarNav } from "./SidebarNav";
 import { LayoutContext } from "../../context/LayoutContext";
-import "./Layout.css";
 
-function Layout({ children }) {
+export function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
 
-  // Hero / header transparency state
   const [hasHero, setHasHero] = useState(false);
   const [heroScrollThreshold, setHeroScrollThreshold] = useState(400);
   const [scrolledPastHero, setScrolledPastHero] = useState(false);
 
-  // Scroll listener — updates whenever threshold changes
   useEffect(() => {
     const handleScroll = () => {
       setScrolledPastHero(window.scrollY > heroScrollThreshold);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
-    // Check immediately in case page is already scrolled
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, [heroScrollThreshold]);
 
-  // Reset when leaving a hero page
   useEffect(() => {
-    if (!hasHero) {
-      setScrolledPastHero(false);
-    }
+    if (!hasHero) setScrolledPastHero(false);
   }, [hasHero]);
 
   const toggleSidebar = () => setSidebarOpen((s) => !s);
@@ -42,7 +35,7 @@ function Layout({ children }) {
 
   return (
     <LayoutContext.Provider value={{ hasHero, setHasHero, setHeroScrollThreshold }}>
-      <div className={`layout${hasHero ? " layout--has-hero" : ""}`}>
+      <LayoutRoot>
         <Header
           toggleSidebar={toggleSidebar}
           isAuthenticated={isAuthenticated}
@@ -55,11 +48,34 @@ function Layout({ children }) {
           closeSidebar={closeSidebar}
           isAuthenticated={isAuthenticated}
         />
-        <main className="main-content">{children}</main>
+        <MainContent hasHero={hasHero}>{children}</MainContent>
         <Footer />
-      </div>
+      </LayoutRoot>
     </LayoutContext.Provider>
   );
 }
 
-export default Layout;
+const LayoutRoot = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+`;
+
+const MainContent = styled("main", {
+  shouldForwardProp: (p) => p !== "hasHero",
+})`
+  flex: 1;
+  padding: 1rem;
+  padding-top: ${({ hasHero }) =>
+    hasHero ? "0" : "calc(var(--header-height) + 1rem)"};
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+    padding-top: ${({ hasHero }) =>
+      hasHero ? "0" : "calc(var(--header-height) + 0.75rem)"};
+  }
+`;
