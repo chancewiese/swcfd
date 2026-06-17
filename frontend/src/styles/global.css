@@ -9,10 +9,12 @@
 
 :root {
   /* Colors */
-  --primary-color: #1976d2;
-  --secondary-color: #f50057;
-  --text-color: #333333;
-  --background-color: #ffffff;
+  /* Theme colors (adjust these to change the site palette) */
+  --primary-color: #0b2447; /* Summer night - deep navy */
+  --secondary-color: #ff7a18; /* Warm accent / sunset orange */
+  --tertiary-color: #f6c84c; /* Sunflower yellow (tertiary) */
+  --text-color: #111827;
+  --background-color: #fffdf8; /* very light warm background */
   --light-gray: #f5f5f5;
 
   /* Spacing */

@@ -9,14 +9,17 @@ import CssBaseline from "@mui/material/CssBaseline";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#1976d2", // Match your existing primary color
-      light: "#42a5f5",
-      dark: "#1565c0",
+      main: "#0b2447", // Summer night - deep navy
+      light: "#2a4a78",
+      dark: "#061831",
     },
     secondary: {
-      main: "#f50057",
-      light: "#ff4081",
-      dark: "#c51162",
+      main: "#ff7a18", // warm accent / sunset orange
+      light: "#ff9a4a",
+      dark: "#c85b00",
+    },
+    tertiary: {
+      main: "#F6C84C", // sunflower yellow (tertiary)
     },
     success: {
       main: "#4caf50",
@@ -24,10 +27,10 @@ const theme = createTheme({
       dark: "#388e3c",
     },
     text: {
-      primary: "#333333", // Match your existing text color
+      primary: "#111827",
     },
     background: {
-      default: "#ffffff",
+      default: "#fffdf8",
       paper: "#ffffff",
     },
   },
